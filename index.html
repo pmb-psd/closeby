@@ -139,7 +139,7 @@ h2{font-weight:600;letter-spacing:-.02em}.fig,.big-money{font-weight:600;letter-
 .empty-p{margin:0;opacity:.85;font-size:14px}
 
 /* Tarjetas genéricas */
-.card{background:var(--card);border:1px solid var(--line);border-radius:26px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--card);border:1px solid transparent;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:12px}
 .tile-s{background:var(--chip);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:2px;min-width:0}
 .tile-s .k{font-size:12px;color:var(--muted)}
 .tile-s .v{font-weight:600;font-size:clamp(12px,4vw,17px);font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.02em}
@@ -248,8 +248,8 @@ legend{font-weight:500;font-size:18px;margin-bottom:6px;padding:0;letter-spacing
 .profile-head .sub{color:var(--muted);font-size:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
 .pill{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--ink)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:14px 12px;display:flex;flex-direction:column;gap:4px;min-width:0}
-.stat .v{font-size:clamp(14px,4.6vw,22px);font-weight:500;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1}
+.stat{background:var(--card);border:1px solid transparent;border-radius:24px;padding:14px 12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat .v{font-size:clamp(14px,4.6vw,22px);font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1.1}
 .stat .k{font-size:12px;color:var(--muted)}
 .stat.lime{background:var(--lime);color:#141317;border-color:transparent;gap:4px;padding:14px 12px;border-radius:22px}
 .stat.lime .k{color:rgba(20,19,23,.7)}
@@ -543,6 +543,17 @@ button.sblock{cursor:pointer}
 .dleg .dv small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
 @media (max-width:360px){.donutwrap{grid-template-columns:1fr;justify-items:center}.dleg{width:100%}}
 /* --- Inicio bento --- */
+.bt.balhero{padding:16px 16px 16px 18px}
+.bt.balhero .tx b{font-size:clamp(30px,11vw,44px);letter-spacing:-.05em}
+.bt .adj{align-self:flex-start;background:#141317;color:#fff;border:0;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;flex:none}
+.bt b.good{color:var(--good)}
+.bt.cardt .lbar{display:block;height:6px;border-radius:999px;background:var(--chip);overflow:hidden}
+.bt.cardt .lbar i{display:block;height:100%;background:var(--lila);border-radius:999px}
+.vsum{margin-bottom:2px}
+.bt.next{background:#141317;color:#fff}
+.bt.next .k{color:rgba(255,255,255,.6)}
+.bt.next b{font-size:44px;line-height:.9;font-weight:800;letter-spacing:-.05em;color:var(--lime)}
+.bt.next .small{color:rgba(255,255,255,.75)}
 .bento{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .bt{border-radius:24px;padding:14px;background:var(--card);display:flex;flex-direction:column;gap:6px;min-width:0;position:relative;overflow:hidden;text-align:left;color:var(--ink);text-decoration:none;border:0;font:inherit}
 .bt .k{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:6px;min-width:0}
@@ -1124,13 +1135,11 @@ function balanceHeroHTML(){
   const b=balanceInfo(), neg=b.avail<0, v=viewCur();
   const intPart=Math.trunc(Math.abs(b.avail)).toLocaleString("es-PE"), dec=Math.round((Math.abs(b.avail)%1)*100).toString().padStart(2,"0");
   const empty=!b.hasStart&&!mine.length&&!aportes.some(a=>a.owner===uid);
-  return `<section class="lime balhero">
-    <div class="head"><span class="tag">Tienes para gastar</span><button class="cta press" type="button" id="adjBal" style="padding:7px 14px;font-size:13px">Ajustar</button></div>
-    ${empty?`<p style="margin:0;font-size:20px;font-weight:500;letter-spacing:-.02em">¿Con cuánto empiezas?</p>`:`
-    <div class="fig num" style="${neg?"color:#B3261E":""}"><span class="nw"><small style="font-size:clamp(16px,7cqi,26px);opacity:1">${neg?"−":""}${sym(b.c)}&nbsp;</small><span data-num="bal" data-val="${Math.trunc(Math.abs(b.avail))}">${intPart}</span><small>.${dec}</small></span></div>
-    ${v!==b.c?`<span class="small num" style="opacity:.75">≈ ${money(conv(b.avail,b.c,v),v)}</span>`:""}
-    <div class="balrow num"><span><small>Ingresos</small><b>${moneyShort(b.ing,b.c)}</b></span><span><small>Gastaste</small><b>${moneyShort(b.gas-b.cred+b.pay,b.c)}</b></span><span><small>Ahorrado</small><b>${moneyShort(b.aho,b.c)}</b></span></div>
-    ${b.debt>0.005?`<span class="small" style="opacity:.75">Debes ${money(b.debt,b.c)} en la tarjeta</span>`:""}`}
+  return `<section class="bt fund balhero wide">
+    <div class="tx"><span class="k">${ICON_LOCK} Tienes para gastar</span>
+    ${empty?`<b style="font-size:22px">¿Con cuánto empiezas?</b>`:`<b class="num" style="${neg?"color:#B3261E":""}"><span class="cur">${neg?"−":""}${sym(b.c)}</span> <span data-num="bal" data-val="${Math.trunc(Math.abs(b.avail))}">${intPart}</span><span class="cur" style="opacity:.55">.${dec}</span></b>
+    ${v!==b.c?`<span class="small num">≈ ${money(conv(b.avail,b.c,v),v)}</span>`:""}`}</div>
+    <button class="adj press" type="button" id="adjBal">Ajustar</button>
   </section>`;
 }
 function axisNum(v){return new Intl.NumberFormat("es-PE",{notation:"compact",maximumFractionDigits:1}).format(v);}
@@ -1205,13 +1214,14 @@ function openCardPaySheet(m){
   if(!db||!uid||!me){toast("Inicia sesión para continuar.");return;}
   const b=balanceInfo(), debt=Math.max(0,b.debt+(m?conv(m.amount,m.cur,b.c):0)), sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>${m?"Editar pago":"Pagar tarjeta"}</h2><button class="link" type="button" id="cp-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">Debes ${money(debt,b.c)}</p>
+    <div class="row"><p class="small muted" style="margin:0">Debes ${money(debt,b.c)}</p><button class="link small" type="button" id="cp-lim">Línea de crédito</button></div>
     <div class="field"><span class="lab">Monto</span><div class="amount-row"><input id="cp-amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${m?m.amount:(debt>0?Math.round(debt*100)/100:"")}" aria-label="Monto"><select id="cp-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${(m?m.cur:b.c)===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
     <div class="grid2"><div class="field"><label for="cp-note">Nota (opcional)</label><input id="cp-note" maxlength="120" value="${esc(m?m.note:"")}" placeholder="Ej. Pago de noviembre"></div><div class="field"><label for="cp-date">Fecha</label><input id="cp-date" type="date" value="${esc(m?m.date:todayStr())}"></div></div>
     <p class="err" id="cp-err"></p>
     <button class="btn block" type="button" id="cp-save">${m?"Guardar cambios":"Registrar pago"}</button>
     ${m?`<button class="btn danger block" type="button" id="cp-del">Eliminar</button>`:""}`;
   document.getElementById("cp-close").onclick=closeSheet;
+  document.getElementById("cp-lim").onclick=openCardLimitSheet;
   document.getElementById("cp-save").onclick=async()=>{
     const amt=Number(document.getElementById("cp-amt").value), cur=document.getElementById("cp-cur").value, date=document.getElementById("cp-date").value, err=document.getElementById("cp-err");
     if(!(amt>0)){err.textContent="Escribe un monto mayor que 0.";return;}
@@ -1342,8 +1352,15 @@ function renderDinero(){
   el.innerHTML=`
   <div class="wrap" style="padding:0">
     <h1 class="pagetitle">Mis finanzas</h1><span class="lockpill">${ICON_LOCK} Solo tú lo ves</span>
-    ${balanceHeroHTML()}
-    ${creditCardHTML()}
+    <div class="bento">
+      ${balanceHeroHTML()}
+      ${(()=>{const b=balanceInfo(); if(!b.hasStart&&!mine.length&&!aportes.some(a=>a.owner===uid)) return "";
+        const lim=cardLimit(), limC=lim.amount>0?conv(lim.amount,lim.cur,b.c):0, debt=Math.max(0,b.debt), pc=limC>0?Math.min(100,debt/limC*100):0;
+        return `<div class="bt money"><span class="k">Entró</span><b class="num good">${moneyShort(b.ing,b.c)}</b></div>
+        <div class="bt money"><span class="k">Gastaste</span><b class="num">${moneyShort(b.gas-b.cred+b.pay,b.c)}</b></div>
+        <div class="bt money"><span class="k">Ahorrado</span><b class="num">${moneyShort(b.aho,b.c)}</b></div>
+        <button type="button" class="bt money cardt press" id="cardTile"><span class="k">${ICON_CARD} Tarjeta</span><b class="num">${moneyShort(debt,b.c)}</b>${limC>0?`<span class="lbar"><i data-grow="bar" style="width:${pc}%;${pc>=90?"background:var(--bad)":""}"></i></span>`:`<span class="small muted">${debt>0.005?"por pagar":"sin deuda"}</span>`}</button>`;})()}
+    </div>
     <h2 id="monthDetail" class="sectitle">Este mes</h2>
     <div class="monthnav"><button type="button" id="mPrev" aria-label="Mes anterior">‹</button><h2>${esc(label)}</h2><button type="button" id="mNext" aria-label="Mes siguiente">›</button></div>
     <div class="card">
@@ -1380,6 +1397,7 @@ function renderDinero(){
   el.querySelectorAll("[data-month]").forEach(b=>b.onclick=()=>{month=b.dataset.month;renderDinero();const d=document.getElementById("monthDetail");if(d)d.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});});
   const eb=document.getElementById("editBudget"); if(eb) eb.onclick=openBudgetSheet;
   const cp=document.getElementById("cardPay"); if(cp) cp.onclick=()=>openCardPaySheet(null);
+  const ct=document.getElementById("cardTile"); if(ct) ct.onclick=()=>{const b=balanceInfo(); b.debt>0.005?openCardPaySheet(null):openCardLimitSheet();};
   const cl=document.getElementById("cardLimit"); if(cl) cl.onclick=openCardLimitSheet;
   bindDonut(el);
   if(dineroGrow){dineroGrow=false;growIn(el);}
@@ -1493,6 +1511,9 @@ function renderViajes(){
   document.getElementById("v-viajes").innerHTML=`
   <div class="wrap" style="padding:0">
     <div class="row" style="align-items:flex-end"><h1 class="pagetitle">Viajes</h1><button class="btn limebtn" type="button" id="newViaje">+ Nuevo viaje</button></div>
+    ${vs.length?(()=>{const nv=nextViaje(), vc=viewCur(), tot=vs.reduce((s,v)=>s+conv(viajeStats(v).saved,v.cur,vc),0), dd=nv?daysUntil(nv.date):null;
+      return `<div class="bento vsum">${nv?`<button type="button" class="bt next press" data-trip="${esc(nv.id)}"><span class="k">${esc(nv.name)}</span><b class="num">${dd===0?"¡Hoy!":dd}</b><span class="small">${dd===0?"se ven":dd===1?"día para verse":"días para verse"}</span></button>`:""}
+        <div class="bt money${nv?"":" wide"}"><span class="k">Ahorrado entre las dos</span><b class="num">${moneyShort(tot,vc)}</b><span class="small muted">${vs.length} ${vs.length===1?"viaje":"viajes"}</span></div></div>`;})():""}
     ${vs.length?vs.map(v=>{
       const st=viajeStats(v), past=st.days!==null&&st.days<0;
       const when=v.date?fmtDate(v.date,{day:"numeric",month:"short",year:"numeric"}):"Sin fecha";
