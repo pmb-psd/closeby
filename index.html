@@ -542,6 +542,38 @@ button.sblock{cursor:pointer}
 .dleg .dv{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
 .dleg .dv small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
 @media (max-width:360px){.donutwrap{grid-template-columns:1fr;justify-items:center}.dleg{width:100%}}
+/* --- Inicio bento --- */
+.bento{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.bt{border-radius:24px;padding:14px;background:var(--card);display:flex;flex-direction:column;gap:6px;min-width:0;position:relative;overflow:hidden;text-align:left;color:var(--ink);text-decoration:none;border:0;font:inherit}
+.bt .k{font-size:12px;color:var(--muted);font-weight:500;display:flex;align-items:center;gap:6px;min-width:0}
+.bt .k svg{width:14px;height:14px;flex:none}
+.bt.wide{grid-column:span 2}
+.bt.clock b{font-size:28px;font-weight:700;letter-spacing:-.04em}
+.bt-note{grid-column:span 2;margin:-4px 4px 0}
+.bt-note:empty{display:none}
+.bt.fund{grid-column:span 2;background:var(--lime);color:var(--on-lime);flex-direction:row;align-items:center;gap:14px;cursor:pointer}
+.bt.fund .k{color:rgba(20,19,23,.65)}
+.bt.fund .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.bt.fund .tx b{font-size:clamp(22px,7.5vw,30px);font-weight:700;letter-spacing:-.04em;white-space:nowrap}
+.bt.fund .tx b .cur{font-size:.6em;font-weight:600}
+.bt.fund .tx .small{opacity:.7}
+.bt.fund .ring .rt{stroke:rgba(20,19,23,.12)}
+.bt.fund .pb{width:46px;height:46px;border-radius:50%;background:#141317;color:var(--lime);display:grid;place-items:center;font-size:26px;font-weight:400;flex:none;border:0;line-height:1}
+.bt.call{background:var(--lila);color:#fff}
+.bt.call .k{color:rgba(255,255,255,.78)}
+.bt.call b{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.bt.call.off{background:var(--chip);color:var(--ink)} .bt.call.off .k{color:var(--muted)} .bt.call.off b{font-size:16px}
+.bt.bprio b{font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bt.bprio .bseg{display:flex;gap:3px;height:10px}
+.bt.bprio .bseg i{border-radius:4px;background:var(--chip);display:block;position:relative;overflow:hidden;min-width:4px}
+.bt.bprio .bseg u{position:absolute;inset:0 auto 0 0;background:var(--lila);border-radius:4px;display:block}
+.bt.money b{font-size:clamp(19px,6vw,24px);font-weight:700;letter-spacing:-.03em;white-space:nowrap}
+.bt .list{margin-top:-4px}
+.ovt{display:flex;align-items:center;gap:10px;width:100%;padding:8px 0;border:0;border-top:1px solid var(--line);background:transparent;color:inherit;font:inherit;text-align:left}
+.ovt:first-of-type{border-top:0}
+.ovt .tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.ovt .tx b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ovt .tx small{font-size:12px;color:var(--muted)}
 .bud{display:flex;flex-direction:column;gap:8px}
 .brow{display:grid;grid-template-columns:18px minmax(0,1fr) 84px auto;gap:6px;align-items:center}
 .brow .bact{display:flex;gap:4px;justify-content:flex-end}
@@ -938,43 +970,39 @@ function renderInicio(){
   else title=`Lejos en el mapa,<br><b>cerca en todo</b>`;
   const noteTxt = nv ? `para ${esc(nv.name)} · ${esc(fmtDate(nv.date,{day:"numeric",month:"long"}))}${nv.place?" · "+esc(nv.place):""}`
     : (focus && !focus.date ? `<button class="link" type="button" data-editviaje="${esc(focus.id)}">Ponle fecha a ${esc(focus.name)}</button>` : `<a class="link" href="#viajes">+ Nuevo viaje</a>`);
-  let hero;
-  if(focus){
-    const st=viajeStats(focus), tg=focus.target;
-    const w1=tg>0?Math.min(100,st.by.p1/tg*100):0, w2=tg>0?Math.min(100-w1,st.by.p2/tg*100):0;
-    hero=`<section class="lime">
-      <div class="head"><span class="tag">Fondo · ${esc(focus.name)}</span>${avs()}</div>
-      <div class="fig num"><span class="nw"><small style="font-size:clamp(16px,7cqi,26px);opacity:1">${sym(focus.cur)}&nbsp;</small><span data-num="h:${esc(focus.id)}" data-val="${Math.round(st.saved)}">${Math.round(st.saved).toLocaleString("es-PE")}</span></span>${tg>0?`<small>/${Math.round(tg).toLocaleString("es-PE")}</small>`:""}</div>
-      ${tg>0?`<div class="stripe" role="img" aria-label="${Math.round(st.pct*100)}% ahorrado">${w1>0?`<i class="p1" data-ak="h:${esc(focus.id)}:p1" style="width:${w1}%"></i>`:""}${w2>0?`<i class="p2" data-ak="h:${esc(focus.id)}:p2" style="width:${w2}%"></i>`:""}</div>`:""}
-      <div class="foot num"><span>${esc(pname("p1"))} ${moneyShort(st.by.p1,focus.cur)} · ${esc(pname("p2"))} ${moneyShort(st.by.p2,focus.cur)}</span><b>${tg>0?Math.round(st.pct*100)+"%":"sin meta"}</b></div>
-      ${coverHTML(focus,st,true)}
-      ${me?`<button class="cta press" type="button" data-aportar="${esc(focus.id)}">+ Ahorrar para este viaje</button>`:""}
-    </section>`;
-  }else{
-    hero=`<section class="lime"><div class="head"><span class="tag">Su primer viaje</span>${avs()}</div>
-      ${me?`<button class="cta press" type="button" id="heroNew">+ Crear viaje</button>`:""}</section>`;
-  }
   const fst=focus?viajeStats(focus):null;
-  const perWeek = fst&&fst.perWeek!==null&&fst.remaining>0 ? `<a class="tile press" href="#viajes"><span class="ic" style="background:var(--soft)">${ICON_PLANE}</span><span class="v num">${moneyShort(fst.perWeek,focus.cur)}</span><span class="k">por semana entre las dos para llegar a tiempo</span><span class="thin"><i style="width:${Math.round(fst.pct*100)}%"></i></span></a>`
-    : `<a class="tile press" href="#viajes"><span class="ic" style="background:var(--soft)">${ICON_PLANE}</span><span class="v num">${aportes.length}</span><span class="k">ahorros registrados entre las dos</span></a>`;
-  const bi = me ? balanceInfo() : null;
-  const myTile = me ? `<a class="tile press" href="#dinero"><span class="ic" style="background:var(--lime)">${ICON_LOCK}</span><span class="v num" style="${bi.avail<0?"color:var(--bad)":""}">${bi.avail<0?"−":""}${moneyShort(Math.abs(bi.avail),bi.c)}</span><span class="k">tienes para gastar</span></a>` : "";
+  const tiles=[];
+  // llamada
+  if(me){const g=dayGrid(todayStr()), nowMin=localParts(Date.now(),viewerTz()).min, nx=g.ranges.find(([a,b])=>b>nowMin), fm=m=>m>=1440?"24:00":fromMin(m);
+    tiles.push(nx?`<a class="bt call press" href="#calendario"><span class="k">${ICON_PHONE} Llamada</span><b class="num">${nx[0]<=nowMin?"¡Ahora!<br>hasta "+fm(nx[1]):"Hoy<br>"+fm(nx[0])+"–"+fm(nx[1])}</b></a>`
+      :`<a class="bt call off press" href="#calendario"><span class="k">${ICON_PHONE} Llamada</span><b>Hoy ya no<br>coinciden</b></a>`);}
+  // prioridad / por semana
+  if(fst&&(focus.budget||[]).length&&focus.target>0){const F=budgetFunding(focus,fst.saved).rows.filter(x=>x.cost>0||x.bought), nx=F.find(x=>x.pct<0.999);
+    tiles.push(`<button type="button" class="bt bprio press" data-trip="${esc(focus.id)}"><span class="k">${nx?"Ahora llenando":"Presupuesto"}</span><b>${nx?esc(nx.name):"¡Todo cubierto!"}</b><span class="bseg">${F.map(x=>`<i style="flex:${Math.max(x.cost,focus.target*0.05)} 1 0"><u data-grow="bar" style="width:${Math.round(x.pct*1000)/10}%;${x.bought?"background:var(--good)":""}"></u></i>`).join("")}</span><span class="small muted num">${nx?"faltan "+moneyShort(nx.amount-nx.funded,focus.cur):F.length+" de "+F.length}</span></button>`);}
+  if(fst&&fst.perWeek!==null&&fst.remaining>0) tiles.push(`<button type="button" class="bt money press" data-trip="${esc(focus.id)}"><span class="k">Por semana</span><b class="num">${moneyShort(fst.perWeek,focus.cur)}</b><span class="small muted">entre las dos</span></button>`);
+  if(me){const bi=balanceInfo(); tiles.push(`<a class="bt money press" href="#dinero"><span class="k">${ICON_LOCK} Para gastar</span><b class="num" style="${bi.avail<0?"color:var(--bad)":""}">${bi.avail<0?"−":""}${moneyShort(Math.abs(bi.avail),bi.c)}</b></a>`);}
+  if(tiles.length%2) tiles[tiles.length-1]=tiles[tiles.length-1].replace('class="bt ','class="bt wide ');
+  const fund=focus?(()=>{const st=fst, tg=focus.target;
+    return `<div class="bt fund press" role="button" tabindex="0" data-trip="${esc(focus.id)}">${tg>0?ringHTML(focus,st,72,10,`<b style="font-size:16px">${Math.round(st.pct*100)}%</b>`):""}
+      <div class="tx"><span class="k">${esc(focus.name)}</span><b class="num"><span class="cur">${sym(focus.cur)}</span> <span data-num="h:${esc(focus.id)}" data-val="${Math.round(st.saved)}">${Math.round(st.saved).toLocaleString("es-PE")}</span></b><span class="small num">${tg>0?"de "+moneyShort(tg,focus.cur):"sin meta"}</span></div>
+      ${me?`<button class="pb press" type="button" data-aportar="${esc(focus.id)}" aria-label="Ahorrar para ${esc(focus.name)}">+</button>`:""}</div>`;})()
+    :`<div class="bt fund"><div class="tx"><span class="k">Su primer viaje</span><b style="font-size:20px">Creen su viaje</b></div>${me?`<button class="pb press" type="button" id="heroNew" aria-label="Crear viaje">+</button>`:""}</div>`;
   document.getElementById("v-inicio").innerHTML=`
   <div class="wrap" style="padding:0">
     <p class="greet">${greet}</p>
     ${todaySpecialHTML()}
     <h1 class="hero-title">${title}</h1>
     ${nv?`<span class="note"><i>i</i><span>${noteTxt}</span></span>`:focus&&!focus.date?`<span class="note">${noteTxt}</span>`:""}
-    <div class="tzchips num"><span><i class="dot p1"></i>${esc(cityName(cfg.p1.tz))} <b id="clk-p1">--:--</b></span><span><i class="dot p2"></i>${esc(cityName(cfg.p2.tz))} <b id="clk-p2">--:--</b></span></div>
-    <span class="note small" id="tzdiff"></span>
-    ${callSummaryToday()}
-    ${hero}
-    <div class="grid2">${myTile}${perWeek}</div>
-    <section class="purple">
-      <div class="hd"><span>Viajes (${viajes.length})</span>${me?`<button type="button" id="newViajeHome" class="press">+ Nuevo</button>`:""}</div>
-      ${others.length?others.slice(0,3).map(x=>{const s=viajeStats(x);return `<a class="vitem press" href="#viajes"><span class="tx">${esc(x.name)}<span class="tag">${x.date?esc(fmtDate(x.date,{month:"short",year:"numeric"})):"Sin fecha"}</span></span><span class="num" style="font-size:13px;opacity:.85">${moneyShort(s.saved,x.cur)}</span>${miniRing(s.pct)}</a>`;}).join(""):""}
-    </section>
-    <div class="card"><h2>Últimos ahorros</h2><div class="list">${recent.length?recent.map(a=>aporteItemHTML(a)).join(""):`<p class="empty">Aún no hay ahorros registrados.</p>`}</div></div>
+    <div class="bento">
+      <div class="bt clock"><span class="k"><i class="dot p1"></i>${esc(cityName(cfg.p1.tz))}</span><b class="num" id="clk-p1">--:--</b></div>
+      <div class="bt clock"><span class="k"><i class="dot p2"></i>${esc(cityName(cfg.p2.tz))}</span><b class="num" id="clk-p2">--:--</b></div>
+      <span class="bt-note small muted" id="tzdiff"></span>
+      ${fund}
+      ${tiles.join("")}
+      ${others.length?`<div class="bt wide"><div class="row"><span class="k">Otros viajes</span>${me?`<button type="button" id="newViajeHome" class="link small">+ Nuevo</button>`:""}</div>
+        ${others.slice(0,3).map(x=>{const s=viajeStats(x);return `<button type="button" class="ovt press" data-trip="${esc(x.id)}"><span class="tx"><b>${esc(x.name)}</b><small>${x.date?esc(fmtDate(x.date,{month:"short",year:"numeric"})):"Sin fecha"}</small></span><span class="num small">${moneyShort(s.saved,x.cur)}</span>${x.target>0?ringHTML(x,s,34,5,""):""}</button>`;}).join("")}</div>`:""}
+      <div class="bt wide"><span class="k">Últimos ahorros</span><div class="list">${recent.length?recent.map(a=>aporteItemHTML(a)).join(""):`<p class="empty">Aún no hay ahorros.</p>`}</div></div>
+    </div>
   </div>`;
   const hn=document.getElementById("heroNew"); if(hn) hn.onclick=()=>openViajeSheet(null);
   const nh=document.getElementById("newViajeHome"); if(nh) nh.onclick=()=>openViajeSheet(null);
