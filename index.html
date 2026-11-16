@@ -596,6 +596,25 @@ button.sblock{cursor:pointer}
 @keyframes cheerIn{from{opacity:0;transform:translate(-50%,-50%) scale(.92)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 @keyframes cheerFade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion: reduce){.cheer{animation:cheerFade 200ms ease both}}
+.bt.spc{background:color-mix(in srgb,#FF7AC6 22%,var(--card))}
+.bt.spc .k{color:var(--ink)} .bt.spc .k svg{color:#E0458F}
+.bt.spc b{font-size:40px;line-height:.9;font-weight:800;letter-spacing:-.05em}
+.bt.spc .k{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;display:block}
+.bt.partner{grid-column:span 2;background:var(--p2);color:#fff;flex-direction:row;align-items:center;gap:12px}
+.bt.partner.p1c{background:var(--p1)}
+.bt.partner .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.bt.partner .tx b{font-size:18px;font-weight:700;display:flex;align-items:center;gap:6px}
+.bt.partner .tx small,.bt.partner .tx small *{color:rgba(255,255,255,.88)!important;font-size:12px}
+.bt.partner .time{font-size:30px;font-weight:700;letter-spacing:-.04em}
+.bt.partner .av{background:rgba(255,255,255,.22)!important;color:#fff}
+.bt.nav{flex-direction:row;align-items:center;gap:10px;font-weight:600;font-size:15px}
+.bt.nav .seticon{width:34px;height:34px;border-radius:12px;flex:none}
+.bt.nav{padding:12px}
+.bt.nav .nl{min-width:0;overflow-wrap:anywhere;line-height:1.15}
+.bt.mes .trio{display:flex;gap:14px;flex-wrap:wrap}
+.bt.mes .trio span{display:flex;flex-direction:column}
+.bt.mes .trio b{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.bt.mes .trio small{font-size:11px;color:var(--muted)}
 .bud{display:flex;flex-direction:column;gap:8px}
 .brow{display:grid;grid-template-columns:18px minmax(0,1fr) 84px auto;gap:6px;align-items:center}
 .brow .bact{display:flex;gap:4px;justify-content:flex-end}
@@ -982,6 +1001,11 @@ function todaySpecialHTML(){
   if(!all.length) return "";
   return `<div class="todayspecial"><span aria-hidden="true">✦</span><span>Hoy: <b>${all.map(esc).join(" · ")}</b></span></div>`;
 }
+function callTile(tag,attr){
+  const g=dayGrid(todayStr()), nowMin=localParts(Date.now(),viewerTz()).min, nx=g.ranges.find(([a,b])=>b>nowMin), fm=m=>m>=1440?"24:00":fromMin(m);
+  return nx?`<${tag} class="bt call press" ${attr}><span class="k">${ICON_PHONE} Llamada</span><b class="num">${nx[0]<=nowMin?"¡Ahora!<br>hasta "+fm(nx[1]):"Hoy<br>"+fm(nx[0])+"–"+fm(nx[1])}</b></${tag}>`
+    :`<${tag} class="bt call off press" ${attr}><span class="k">${ICON_PHONE} Llamada</span><b>Hoy ya no<br>coinciden</b></${tag}>`;
+}
 function renderInicio(){
   const v=viewCur(), t=myMonthTotals(todayStr().slice(0,7));
   const nv=nextViaje(), all=sortedViajes(), focus=nv||all[0]||null;
@@ -998,9 +1022,7 @@ function renderInicio(){
   const fst=focus?viajeStats(focus):null;
   const tiles=[];
   // llamada
-  if(me){const g=dayGrid(todayStr()), nowMin=localParts(Date.now(),viewerTz()).min, nx=g.ranges.find(([a,b])=>b>nowMin), fm=m=>m>=1440?"24:00":fromMin(m);
-    tiles.push(nx?`<a class="bt call press" href="#calendario"><span class="k">${ICON_PHONE} Llamada</span><b class="num">${nx[0]<=nowMin?"¡Ahora!<br>hasta "+fm(nx[1]):"Hoy<br>"+fm(nx[0])+"–"+fm(nx[1])}</b></a>`
-      :`<a class="bt call off press" href="#calendario"><span class="k">${ICON_PHONE} Llamada</span><b>Hoy ya no<br>coinciden</b></a>`);}
+  if(me) tiles.push(callTile("a",'href="#calendario"'));
   // prioridad / por semana
   if(fst&&(focus.budget||[]).length&&focus.target>0){const F=budgetFunding(focus,fst.saved).rows.filter(x=>x.cost>0||x.bought), nx=F.find(x=>x.pct<0.999);
     tiles.push(`<button type="button" class="bt bprio press" data-trip="${esc(focus.id)}"><span class="k">${nx?"Ahora llenando":"Presupuesto"}</span><b>${nx?esc(nx.name):"¡Todo cubierto!"}</b><span class="bseg">${F.map(x=>`<i style="flex:${Math.max(x.cost,focus.target*0.05)} 1 0"><u data-grow="bar" style="width:${Math.round(x.pct*1000)/10}%;${x.bought?"background:var(--good)":""}"></u></i>`).join("")}</span><span class="small muted num">${nx?"faltan "+moneyShort(nx.amount-nx.funded,focus.cur):F.length+" de "+F.length}</span></button>`);}
@@ -1981,6 +2003,10 @@ function renderCalendario(){
     <h1 class="pagetitle">Calendario</h1>
     <div class="calbar">${me?`<div class="seg" id="calFilter">${[["todo","Todo"],["mias","Mías"],["otra","De "+pname(me==="p1"?"p2":"p1")]].map(([k,l])=>`<button type="button" data-f="${k}" aria-pressed="${calFilter===k}">${esc(l)}</button>`).join("")}</div>`:""}
     <div class="seg viewseg" id="calViewSeg"><button type="button" data-v="mes" aria-pressed="${calView==="mes"}">Mes</button><button type="button" data-v="semana" aria-pressed="${calView==="semana"}">Semana</button></div></div>
+    ${me?(()=>{const sp=special[0], dd=sp?dnum(sp.next)-dnum(t):null;
+      return `<div class="bento">${callTile("button",'type="button" id="calCallTile"')}
+      ${sp?`<button type="button" class="bt spc press" data-act="${esc(sp.e.key)}" data-date="${esc(sp.next)}"><span class="k">${ICON_HEART} ${esc(sp.e.auto?autoTitle(sp.e,sp.next):sp.e.title)}</span><b class="num">${dd===0?"¡Hoy!":dd}</b><span class="small">${dd===0?"":dd===1?"día":"días"}</span></button>`
+        :`<button type="button" class="bt spc press" id="calAddSpc"><span class="k">${ICON_HEART} Fechas especiales</span><b style="font-size:20px">+ Agregar</b></button>`}</div>`;})():""}
     ${calView==="semana"?weekHTML():`<section class="card">
       <div class="monthnav"><button type="button" id="cPrev" aria-label="Mes anterior">‹</button><h2>${esc(label)}</h2><button type="button" id="cNext" aria-label="Mes siguiente">›</button></div>
       <div class="swclip"><div class="calgrid swbody">${["L","M","M","J","V","S","D"].map(x=>`<span class="cwd">${x}</span>`).join("")}${cells}</div></div>
@@ -2021,6 +2047,8 @@ function renderCalendario(){
   const cn=document.getElementById("cNext"); if(cn) cn.onclick=()=>shift(1);
   el.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{calSel=b.dataset.day;calMonth=calSel.slice(0,7);renderCalendario();});
   const gt=document.getElementById("goToday"); if(gt) gt.onclick=()=>{calSel=t;calMonth=t.slice(0,7);calWeek=mondayOf(t);renderCalendario();};
+  const ctl=document.getElementById("calCallTile"); if(ctl) ctl.onclick=()=>{calSel=t;calMonth=t.slice(0,7);calWeek=mondayOf(t);renderCalendario();const cb=document.querySelector(".callbox");if(cb)cb.scrollIntoView({behavior:reducedMotion()?"auto":"smooth",block:"center"});};
+  const cas=document.getElementById("calAddSpc"); if(cas) cas.onclick=()=>openActSheet(null,{date:t,kind:"especial",yearly:true});
   el.querySelectorAll("#calViewSeg [data-v]").forEach(b=>b.onclick=()=>{calView=b.dataset.v;try{localStorage.setItem("closeby-calview",calView);}catch(e){}calWeek=mondayOf(calSel);wkScroll=null;renderCalendario();});
   if(calView==="semana"){
     const wshift=k=>{calWeek=addDays(calWeek||mondayOf(calSel),7*k);calSel=calWeek===mondayOf(t)?t:calWeek;calMonth=calSel.slice(0,7);renderCalendario();};
@@ -2214,22 +2242,13 @@ function renderPerfil(){
       <h1>${esc(pfull(me))}</h1>
       <div class="sub"><span class="pill"><i class="dot ${me}"></i>${esc(cityName(my.tz))}</span><span class="pill">${sym(c)} ${c==="PEN"?"Soles":c==="CAD"?"Dólares canadienses":"Dólares estadounidenses"}</span></div>
     </div>
-    <a class="card setcard press" href="#ajustes"><span class="seticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg></span><span class="setcard-t"><b>Ajustes</b><small>Moneda, presupuesto, categorías y colores</small></span><span aria-hidden="true" class="setcard-go">›</span></a>
-    <button class="card setcard press" type="button" id="openProf"><span class="seticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3"/></svg></span><span class="setcard-t"><b>Tus datos</b><small>${esc(pfull(me))} · ${esc(cityName(my.tz))}${my.birthday?" · "+esc(fmtDate(my.birthday,{day:"numeric",month:"long"})):" · sin cumpleaños"}</small></span><span aria-hidden="true" class="setcard-go">›</span></button>
-    <div class="stats">
-      <div class="stat lime"><span class="k">Ahorraste en total</span><span class="v">${moneyShort(total,c)}</span></div>
-      <div class="stat"><span class="k">Ahorros registrados</span><span class="v">${mine_ap.length}</span></div>
-      <div class="stat"><span class="k">Viajes activos</span><span class="v">${active}</span></div>
-    </div>
-    <div class="card">
-      <div class="row"><h2>Tu mes</h2><span class="lockpill">${ICON_LOCK} Solo tú</span></div>
-      <div class="grid3"><div class="tile-s"><span class="k">Ingresos</span><span class="v good">${moneyShort(tm.ingreso,viewCur())}</span></div><div class="tile-s"><span class="k">Gastos</span><span class="v">${moneyShort(tm.gasto,viewCur())}</span></div><div class="tile-s"><span class="k">Ahorrado</span><span class="v">${moneyShort(tm.ahorro,viewCur())}</span></div></div>
-      <a class="link small" href="#dinero">Ver mis finanzas</a>
-    </div>
-    <div class="card">
-      <h2>Tu pareja</h2>
-      <div class="partner"><span class="av ${other}" style="width:44px;height:44px;font-size:18px">${esc(pname(other).slice(0,1).toUpperCase())}</span>
-        <span class="tx"><b>${esc(pfull(other))} ${isOnline(other)?`<i class="live on" title="En línea"></i>`:""}</b><small>${esc(cityName(cfg[other].tz))} · ${diffLine()}${!isOnline(other)&&seenText(other)?" · activa "+seenText(other):""}</small></span><span class="time num">${otherTime}</span></div>
+    <div class="bento">
+      <div class="bt partner${other==="p1"?" p1c":""}"><span class="av ${other}" style="width:44px;height:44px;font-size:18px">${esc(pname(other).slice(0,1).toUpperCase())}</span>
+        <span class="tx"><b>${esc(pname(other))} ${isOnline(other)?`<i class="live on" title="En línea"></i>`:""}</b><small>${esc(cityName(cfg[other].tz))} · ${diffLine()}${!isOnline(other)&&seenText(other)?" · activa "+seenText(other):""}</small></span><span class="time num">${otherTime}</span></div>
+      <div class="bt fund"><div class="tx"><span class="k">Ahorraste para viajes</span><b class="num">${moneyShort(total,c)}</b></div></div>
+      <a class="bt mes wide press" href="#dinero"><span class="k">${ICON_LOCK} Tu mes</span><span class="trio num"><span><small>Entró</small><b class="good" style="color:var(--good)">${moneyShort(tm.ingreso,viewCur())}</b></span><span><small>Gastos</small><b>${moneyShort(tm.gasto,viewCur())}</b></span><span><small>Ahorrado</small><b>${moneyShort(tm.ahorro,viewCur())}</b></span></span></a>
+      <a class="bt nav press" href="#ajustes"><span class="seticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg></span><span class="nl">Ajustes</span></a>
+      <button class="bt nav press" type="button" id="openProf"><span class="seticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3"/></svg></span><span class="nl">Tus datos</span></button>
     </div>
     <div class="card"><h2>Apariencia</h2>
       <span class="small muted">Colores</span>
