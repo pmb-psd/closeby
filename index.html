@@ -872,9 +872,9 @@ function countHTML(){
   const v=nextViaje();
   if(!v){
     const sinFecha=sortedViajes().find(x=>!x.date);
-    if(sinFecha) return `<div class="card"><h2>Próximo encuentro: ${esc(sinFecha.name)}</h2><p class="muted" style="margin:0">Este viaje todavía no tiene fecha. Pónsela y empieza la cuenta regresiva.</p><button class="btn ghost" type="button" data-editviaje="${esc(sinFecha.id)}">Poner fecha</button></div>`;
-    if(viajes.length) return `<div class="card"><h2>Próximo encuentro</h2><p class="muted" style="margin:0">Todos sus viajes ya pasaron. Creen el siguiente en Viajes.</p><a class="link" href="#viajes">Ir a Viajes</a></div>`;
-    return `<div class="card"><h2>Próximo encuentro</h2><p class="muted" style="margin:0">Creen un viaje con fecha en la sección Viajes y aquí aparece la cuenta regresiva.</p><a class="link" href="#viajes">Ir a Viajes</a></div>`;
+    if(sinFecha) return `<div class="card"><h2>Próximo encuentro: ${esc(sinFecha.name)}</h2><button class="btn ghost" type="button" data-editviaje="${esc(sinFecha.id)}">Poner fecha</button></div>`;
+    if(viajes.length) return `<div class="card"><h2>Próximo encuentro</h2><a class="btn ghost" href="#viajes">+ Nuevo viaje</a></div>`;
+    return `<div class="card"><h2>Próximo encuentro</h2><a class="btn ghost" href="#viajes">+ Nuevo viaje</a></div>`;
   }
   const d=daysUntil(v.date);
   return `<div class="card"><div class="count"><span class="big num">${d===0?"¡Hoy!":d}</span><div class="lbl"><b>${d===0?"Hoy se ven":d===1?"día para vernos":"días para vernos"}</b><span class="muted small">${esc(v.name)} · ${esc(fmtDate(v.date,{weekday:"long",day:"numeric",month:"long"}))}${v.place?" · "+esc(v.place):""}</span></div></div></div>`;
@@ -937,7 +937,7 @@ function renderInicio(){
   else if(nv) title=`Faltan<br><b class="num">${d} ${d===1?"día":"días"}</b>`;
   else title=`Lejos en el mapa,<br><b>cerca en todo</b>`;
   const noteTxt = nv ? `para ${esc(nv.name)} · ${esc(fmtDate(nv.date,{day:"numeric",month:"long"}))}${nv.place?" · "+esc(nv.place):""}`
-    : (focus && !focus.date ? `${esc(focus.name)} todavía no tiene fecha. <button class="link" type="button" data-editviaje="${esc(focus.id)}">Ponle fecha</button>` : `Creen un viaje con fecha para empezar la cuenta regresiva.`);
+    : (focus && !focus.date ? `<button class="link" type="button" data-editviaje="${esc(focus.id)}">Ponle fecha a ${esc(focus.name)}</button>` : `<a class="link" href="#viajes">+ Nuevo viaje</a>`);
   let hero;
   if(focus){
     const st=viajeStats(focus), tg=focus.target;
@@ -952,20 +952,19 @@ function renderInicio(){
     </section>`;
   }else{
     hero=`<section class="lime"><div class="head"><span class="tag">Su primer viaje</span>${avs()}</div>
-      <p style="margin:0;font-size:22px;font-weight:500;letter-spacing:-.02em">Creen un viaje, pónganle una meta y ahorren juntas.</p>
       ${me?`<button class="cta press" type="button" id="heroNew">+ Crear viaje</button>`:""}</section>`;
   }
   const fst=focus?viajeStats(focus):null;
   const perWeek = fst&&fst.perWeek!==null&&fst.remaining>0 ? `<a class="tile press" href="#viajes"><span class="ic" style="background:var(--soft)">${ICON_PLANE}</span><span class="v num">${moneyShort(fst.perWeek,focus.cur)}</span><span class="k">por semana entre las dos para llegar a tiempo</span><span class="thin"><i style="width:${Math.round(fst.pct*100)}%"></i></span></a>`
     : `<a class="tile press" href="#viajes"><span class="ic" style="background:var(--soft)">${ICON_PLANE}</span><span class="v num">${aportes.length}</span><span class="k">ahorros registrados entre las dos</span></a>`;
   const bi = me ? balanceInfo() : null;
-  const myTile = me ? `<a class="tile press" href="#dinero"><span class="ic" style="background:var(--lime)">${ICON_LOCK}</span><span class="v num" style="${bi.avail<0?"color:var(--bad)":""}">${bi.avail<0?"−":""}${moneyShort(Math.abs(bi.avail),bi.c)}</span><span class="k">tienes para gastar · solo tú lo ves</span></a>` : "";
+  const myTile = me ? `<a class="tile press" href="#dinero"><span class="ic" style="background:var(--lime)">${ICON_LOCK}</span><span class="v num" style="${bi.avail<0?"color:var(--bad)":""}">${bi.avail<0?"−":""}${moneyShort(Math.abs(bi.avail),bi.c)}</span><span class="k">tienes para gastar</span></a>` : "";
   document.getElementById("v-inicio").innerHTML=`
   <div class="wrap" style="padding:0">
     <p class="greet">${greet}</p>
     ${todaySpecialHTML()}
     <h1 class="hero-title">${title}</h1>
-    <span class="note"><i>i</i><span>${noteTxt}</span></span>
+    ${nv?`<span class="note"><i>i</i><span>${noteTxt}</span></span>`:focus&&!focus.date?`<span class="note">${noteTxt}</span>`:""}
     <div class="tzchips num"><span><i class="dot p1"></i>${esc(cityName(cfg.p1.tz))} <b id="clk-p1">--:--</b></span><span><i class="dot p2"></i>${esc(cityName(cfg.p2.tz))} <b id="clk-p2">--:--</b></span></div>
     <span class="note small" id="tzdiff"></span>
     ${callSummaryToday()}
@@ -973,7 +972,7 @@ function renderInicio(){
     <div class="grid2">${myTile}${perWeek}</div>
     <section class="purple">
       <div class="hd"><span>Viajes (${viajes.length})</span>${me?`<button type="button" id="newViajeHome" class="press">+ Nuevo</button>`:""}</div>
-      ${others.length?others.slice(0,3).map(x=>{const s=viajeStats(x);return `<a class="vitem press" href="#viajes"><span class="tx">${esc(x.name)}<span class="tag">${x.date?esc(fmtDate(x.date,{month:"short",year:"numeric"})):"Sin fecha"}</span></span><span class="num" style="font-size:13px;opacity:.85">${moneyShort(s.saved,x.cur)}</span>${miniRing(s.pct)}</a>`;}).join(""):`<p class="empty-p">${focus?"Por ahora solo tienen este viaje. Pueden sumar otro cuando quieran.":"Aquí aparecerán sus viajes."}</p>`}
+      ${others.length?others.slice(0,3).map(x=>{const s=viajeStats(x);return `<a class="vitem press" href="#viajes"><span class="tx">${esc(x.name)}<span class="tag">${x.date?esc(fmtDate(x.date,{month:"short",year:"numeric"})):"Sin fecha"}</span></span><span class="num" style="font-size:13px;opacity:.85">${moneyShort(s.saved,x.cur)}</span>${miniRing(s.pct)}</a>`;}).join(""):""}
     </section>
     <div class="card"><h2>Últimos ahorros</h2><div class="list">${recent.length?recent.map(a=>aporteItemHTML(a)).join(""):`<p class="empty">Aún no hay ahorros registrados.</p>`}</div></div>
   </div>`;
@@ -985,7 +984,7 @@ function renderInicio(){
 /* ---------- Mis finanzas (privado) ---------- */
 function budgetCard(gastoView){
   const b=budget();
-  if(!b.amount) return `<div class="card"><div class="row"><h2>Presupuesto del mes</h2></div><p class="small muted" style="margin:0">Ponte un límite de gasto mensual y te aviso cuando te acerques.</p><button class="btn ghost block" type="button" id="editBudget">Definir presupuesto</button></div>`;
+  if(!b.amount) return `<div class="card"><div class="row"><h2>Presupuesto del mes</h2></div><button class="btn ghost block" type="button" id="editBudget">Definir presupuesto</button></div>`;
   const g=conv(gastoView,viewCur(),b.cur), p=g/b.amount*100, left=b.amount-g;
   const col=p>=100?"var(--bad)":p>=80?"#E8A317":"var(--lila)";
   const msg=p>=100?`Te pasaste por ${money(-left,b.cur)}.`:p>=80?`Cuidado: ya usaste el ${Math.round(p)}%. Te quedan ${money(left,b.cur)}.`:`Te quedan ${money(left,b.cur)} para este mes.`;
@@ -998,7 +997,7 @@ function limitsCur(){return ["PEN","CAD","USD"].includes(prefs.limitsCur)?prefs.
 function catLimitsCard(catsView){
   const lim=catLimits(), lc=limitsCur(), keys=Object.keys(lim);
   if(!keys.length) return `<div class="card"><div class="row"><h2>Límites por categoría</h2><span class="lockpill">${ICON_LOCK} Solo tú</span></div>
-    <p class="small muted" style="margin:0">Pon un tope a los gastos que quieras cuidar, por ejemplo delivery o salidas, y te aviso cuando te acerques.</p>
+    
     <button class="btn ghost block" type="button" id="editLimits">Poner límites</button></div>`;
   const rows=keys.map(k=>{const spent=conv(catsView[k]||0,viewCur(),lc), p=spent/lim[k]*100;return {k,spent,lim:lim[k],p};}).sort((a,b)=>b.p-a.p);
   const over=rows.filter(r=>r.p>=100).length, near=rows.filter(r=>r.p>=80&&r.p<100).length;
@@ -1013,7 +1012,7 @@ function openRelationSheet(){
   if(!db||!me){toast("Inicia sesión para continuar.");return;}
   const r=cfg.relation, sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>Aniversario y mesesario</h2><button class="link" type="button" id="r-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">Lo ven las dos. El calendario les recordará cada aniversario y, si quieren, cada mesesario.</p>
+    
     <div class="field"><label for="r-start">¿Desde cuándo están juntas?</label><input id="r-start" type="date" value="${esc(r.start)}"></div>
     <label class="check"><input type="checkbox" id="r-mes" ${r.mesesario?"checked":""}> Recordar también el mesesario cada mes</label>
     <p class="small muted" style="margin:0" id="r-info"></p>
@@ -1042,7 +1041,7 @@ function openBudgetSheet(){
   if(!me) return;
   const b=budget(), sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>Presupuesto del mes</h2><button class="link" type="button" id="bs-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">${ICON_LOCK} Solo tú lo ves. Es el tope para todos tus gastos de cada mes; te aviso al llegar al 80%.</p>
+    
     <div class="field"><span class="lab">Límite mensual</span>
       <div class="amount-row"><input id="bs-amt" type="number" inputmode="decimal" min="0" step="1" placeholder="0" value="${b.amount||""}" aria-label="Límite mensual"><select id="bs-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${b.cur===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
     <p class="err" id="bs-err"></p>
@@ -1061,7 +1060,7 @@ function openLimitsSheet(){
   const cats=[...new Set([...catsGasto(),...Object.keys(lim)])];
   const sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>Límites por categoría</h2><button class="link" type="button" id="l-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">${ICON_LOCK} Solo tú los ves. Deja vacío lo que no quieras limitar. Son límites por mes.</p>
+    
     <div class="field"><label for="l-cur">Moneda de los límites</label>${curSelect("l-cur",lc)}</div>
     <div class="limgrid">${cats.map((c,i)=>`<label for="l-${i}">${esc(c)}</label><input id="l-${i}" data-cat="${esc(c)}" type="number" inputmode="decimal" min="0" step="1" placeholder="Sin límite" value="${lim[c]||""}">`).join("")}</div>
     <p class="err" id="l-err"></p>
@@ -1099,11 +1098,11 @@ function balanceHeroHTML(){
   const empty=!b.hasStart&&!mine.length&&!aportes.some(a=>a.owner===uid);
   return `<section class="lime balhero">
     <div class="head"><span class="tag">Tienes para gastar</span><button class="cta press" type="button" id="adjBal" style="padding:7px 14px;font-size:13px">Ajustar</button></div>
-    ${empty?`<p style="margin:0;font-size:20px;font-weight:500;letter-spacing:-.02em">¿Con cuánto empiezas? Toca «Ajustar» y escribe cuánto tienes hoy.</p>`:`
+    ${empty?`<p style="margin:0;font-size:20px;font-weight:500;letter-spacing:-.02em">¿Con cuánto empiezas?</p>`:`
     <div class="fig num" style="${neg?"color:#B3261E":""}"><span class="nw"><small style="font-size:clamp(16px,7cqi,26px);opacity:1">${neg?"−":""}${sym(b.c)}&nbsp;</small><span data-num="bal" data-val="${Math.trunc(Math.abs(b.avail))}">${intPart}</span><small>.${dec}</small></span></div>
     ${v!==b.c?`<span class="small num" style="opacity:.75">≈ ${money(conv(b.avail,b.c,v),v)}</span>`:""}
     <div class="balrow num"><span><small>Ingresos</small><b>${moneyShort(b.ing,b.c)}</b></span><span><small>Gastaste</small><b>${moneyShort(b.gas-b.cred+b.pay,b.c)}</b></span><span><small>Ahorrado</small><b>${moneyShort(b.aho,b.c)}</b></span></div>
-    <span class="small" style="opacity:.75">Acumulado de todos los meses${b.hasStart?" desde tu saldo inicial":""}. Lo que guardas en tus ahorros o en viajes ya no cuenta para gastar; los fondos van aparte.${b.debt>0.005?` Además debes ${money(b.debt,b.c)} en la tarjeta.`:""}</span>`}
+    ${b.debt>0.005?`<span class="small" style="opacity:.75">Debes ${money(b.debt,b.c)} en la tarjeta</span>`:""}`}
   </section>`;
 }
 function axisNum(v){return new Intl.NumberFormat("es-PE",{notation:"compact",maximumFractionDigits:1}).format(v);}
@@ -1136,7 +1135,7 @@ function openBalanceSheet(){
   if(!me) return;
   const b=balanceInfo(), sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>¿Cuánto tienes para gastar?</h2><button class="link" type="button" id="ab-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">${ICON_LOCK} Solo tú lo ves. Escribe cuánto dinero tienes disponible hoy (en tu cuenta, efectivo, etc.). Desde ahí la app suma tus ingresos y resta tus gastos y ahorros.</p>
+    
     <div class="field"><span class="lab">Hoy tengo</span>
       <div class="amount-row"><input id="ab-amt" type="number" inputmode="decimal" step="0.01" value="${(b.hasStart||mine.length)?Math.round(b.avail*100)/100:""}" placeholder="0.00" aria-label="Monto disponible"><select id="ab-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${b.c===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
     <p class="err" id="ab-err"></p>
@@ -1168,9 +1167,9 @@ function creditCardHTML(){
   return `<section class="card"><div class="row"><h2>Tarjeta de crédito</h2><span class="lockpill">${ICON_LOCK} Solo tú</span></div>
     ${used||lim.amount>0?`<div class="cardhero"><small>${over?"Pagaste de más (saldo a favor)":"Debes en la tarjeta"}</small><b>${money(over?-b.debt:debt,c)}</b>
       ${limC>0?`<span class="track" style="height:8px;border-radius:999px;background:var(--chip);overflow:hidden"><i style="display:block;height:100%;width:${pc}%;background:${pc>=90?"var(--bad)":"var(--lila)"};border-radius:999px"></i></span><small class="num">${Math.round(pc)}% de tu línea de ${moneyShort(limC,c)} · te quedan ${moneyShort(Math.max(0,limC-debt),c)}</small>`:""}</div>
-      <p class="small muted" style="margin:0">Lo que pagas con tarjeta cuenta como gasto del mes, pero no baja «Tienes para gastar» hasta que pagas la tarjeta.</p>
+      
       <div class="grid2"><button class="btn limebtn" type="button" id="cardPay"${debt<=0.005?" disabled":""}>Pagar tarjeta</button><button class="btn ghost" type="button" id="cardLimit">${lim.amount>0?"Cambiar línea":"Poner línea"}</button></div>`
-    :`<p class="small muted" style="margin:0">Al registrar un gasto, elige «Tarjeta de crédito» y se separa de tu cuenta de débito: verás cuánto debes y, cuando pagues, se descuenta de tu saldo.</p>
+    :`<div class="cardhero"><small>Debes en la tarjeta</small><b>${money(0,c)}</b></div>
       <button class="btn ghost block" type="button" id="cardLimit">Poner línea de crédito (opcional)</button>`}
   </section>`;
 }
@@ -1178,7 +1177,7 @@ function openCardPaySheet(m){
   if(!db||!uid||!me){toast("Inicia sesión para continuar.");return;}
   const b=balanceInfo(), debt=Math.max(0,b.debt+(m?conv(m.amount,m.cur,b.c):0)), sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>${m?"Editar pago":"Pagar tarjeta"}</h2><button class="link" type="button" id="cp-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">Debes ${money(debt,b.c)}. El pago sale de «Tienes para gastar» y baja la deuda. No cuenta como gasto nuevo (ya lo contaste al comprar).</p>
+    <p class="small muted" style="margin:0">Debes ${money(debt,b.c)}</p>
     <div class="field"><span class="lab">Monto</span><div class="amount-row"><input id="cp-amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${m?m.amount:(debt>0?Math.round(debt*100)/100:"")}" aria-label="Monto"><select id="cp-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${(m?m.cur:b.c)===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
     <div class="grid2"><div class="field"><label for="cp-note">Nota (opcional)</label><input id="cp-note" maxlength="120" value="${esc(m?m.note:"")}" placeholder="Ej. Pago de noviembre"></div><div class="field"><label for="cp-date">Fecha</label><input id="cp-date" type="date" value="${esc(m?m.date:todayStr())}"></div></div>
     <p class="err" id="cp-err"></p>
@@ -1201,7 +1200,7 @@ function openCardPaySheet(m){
 function openCardLimitSheet(){
   const l=cardLimit(), sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>Línea de crédito</h2><button class="link" type="button" id="cl-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">Opcional. Sirve para ver cuánto te queda disponible en la tarjeta. Déjalo en blanco para quitarla.</p>
+    
     <div class="field"><span class="lab">Monto</span><div class="amount-row"><input id="cl-amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${l.amount||""}" aria-label="Línea de crédito"><select id="cl-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${l.cur===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
     <p class="err" id="cl-err"></p><button class="btn block" type="button" id="cl-save">Guardar</button>`;
   document.getElementById("cl-close").onclick=closeSheet;
@@ -1217,13 +1216,13 @@ function potsCardHTML(){
       return `<button type="button" class="box press" data-kind="pot" data-box="${esc(p.id)}"><span class="boxic potic">${ICON_PIG}</span>
         <span class="boxt"><b>${esc(p.name)}</b><small class="num">${money(bal,p.cur)}${p.target>0?` de ${moneyShort(p.target,p.cur)}`:" · sin meta"}</small>
         ${p.target>0?`<span class="track"><i style="width:${pc}%"></i></span>`:""}</span>${p.target>0?`<span class="boxpc num">${Math.round(pc)}%</span>`:""}</button>`;}).join("")}</div>`
-      :`<p class="small muted" style="margin:0">Separa plata para lo que quieras, con meta (una laptop, emergencias) o sin meta. Lo que guardes aquí deja de contar en «Tienes para gastar».</p>`}
+      :``}
     <button class="btn ghost block" type="button" id="newPot">+ Nuevo ahorro</button></section>`;
 }
 function fundsCardHTML(){
   const fs=funds();
   return `<section class="card"><div class="row"><h2>Fondos</h2><span class="lockpill">${ICON_LOCK} Solo tú</span></div>
-    ${funds().length?"":`<p class="small muted" style="margin:0">Dinero que te dan para algo específico y que no es tuyo para gastar, por ejemplo lo de la universidad que te pasan tus papás. No suma a tu saldo ni a tus ahorros.</p>`}
+    ${funds().length?"":``}
     ${fs.length?`<div class="boxes">${fs.map(f=>{const bal=boxBalance("fund",f);
       return `<button type="button" class="box press" data-kind="fund" data-box="${esc(f.id)}"><span class="boxic fundic">${ICON_FUND}</span>
         <span class="boxt"><b>${esc(f.name)}</b><small>${f.from?"De: "+esc(f.from)+" · ":""}queda</small></span><span class="boxbal num">${money(bal,f.cur)}</span></button>`;}).join("")}</div>`:""}
@@ -1283,8 +1282,6 @@ function openMoveSheet(kind,boxId,dir,m){
   const title=isPot?(dir==="in"?"Guardar en":"Sacar de"):(dir==="in"?"Recibí en":"Usé de");
   const sh=document.getElementById("sheet");
   sh.innerHTML=`<div class="row"><h2>${title} ${esc(b.name)}</h2><button class="link" type="button" id="mv-close">Cerrar</button></div>
-    <p class="small muted" style="margin:0">${isPot?(dir==="in"?"Sale de «Tienes para gastar» y queda separado aquí.":"Vuelve a «Tienes para gastar».")
-      :(dir==="in"?"Queda en el fondo. No suma a tu saldo.":"Registra en qué usaste este dinero. No resta de tu saldo.")}</p>
     <div class="field"><span class="lab">Monto</span><div class="amount-row"><input id="mv-amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${m?m.amount:""}" aria-label="Monto"><select id="mv-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${(m?m.cur:b.cur)===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
     <div class="grid2"><div class="field"><label for="mv-note">Nota (opcional)</label><input id="mv-note" maxlength="120" value="${esc(m?m.note:"")}" placeholder="${!isPot&&dir==="out"?"Ej. Pensión de noviembre":""}"></div><div class="field"><label for="mv-date">Fecha</label><input id="mv-date" type="date" value="${esc(m?m.date:todayStr())}"></div></div>
     <p class="err" id="mv-err"></p>
@@ -1306,7 +1303,7 @@ function openMoveSheet(kind,boxId,dir,m){
 }
 function renderDinero(){
   const el=document.getElementById("v-dinero");
-  if(!me){el.innerHTML=`<div class="card"><h2>Mis finanzas</h2><p class="muted" style="margin:0">Inicia sesión para ver y registrar tus ingresos y gastos.</p></div>`;return;}
+  if(!me){el.innerHTML=`<div class="card"><h2>Mis finanzas</h2></div>`;return;}
   const v=viewCur(), t=myMonthTotals(month);
   const [y,mo]=month.split("-").map(Number), label=(s=>s.charAt(0).toUpperCase()+s.slice(1))(new Date(y,mo-1,1).toLocaleDateString("es-PE",{month:"long",year:"numeric"}));
   const list=mine.filter(m=>m.date.slice(0,7)===month).sort(sortByDate);
@@ -1316,7 +1313,7 @@ function renderDinero(){
   const free=t.ingreso-t.gasto-t.ahorro;
   el.innerHTML=`
   <div class="wrap" style="padding:0">
-    <h1 class="pagetitle">Mis finanzas</h1><span class="lockpill">${ICON_LOCK} Solo tú lo ves · ${esc(pname(me==="p1"?"p2":"p1"))} solo ve tus ahorros para viajes</span>
+    <h1 class="pagetitle">Mis finanzas</h1><span class="lockpill">${ICON_LOCK} Solo tú lo ves</span>
     ${balanceHeroHTML()}
     ${creditCardHTML()}
     <h2 id="monthDetail" class="sectitle">Este mes</h2>
@@ -1328,13 +1325,13 @@ function renderDinero(){
         <div class="tile-s"><span class="k"><i style="background:var(--s-gas)"></i>Gastos</span><span class="v">${moneyShort(t.gasto,v)}</span></div>
         <div class="tile-s"><span class="k"><i style="background:var(--s-aho)"></i>Ahorrado</span><span class="v">${moneyShort(t.ahorro,v)}</span></div>
       </div>
-      <p class="small muted" style="margin:0">Totales en ${curName(v)}. Cambio: 1 C$ = S/ ${cfg.rate.toFixed(2)} · 1 US$ = S/ ${cfg.usd.toFixed(2)}.</p>
+      
     </div>
     ${(()=>{catColors={};ca.slice(0,5).forEach(([c],i)=>catColors[c]=["var(--s-gas)","var(--c2)","var(--c3)","var(--c4)","var(--c5)"][i]);
       const rows=[...list.map(m=>({m,h:personalItemHTML(m)})),...myAp.map(a=>({m:a,h:aporteItemHTML(a,true)}))].sort((a,b)=>sortByDate(a.m,b.m));const shown=movAll?rows:rows.slice(0,10);
       let last="";const grouped=shown.map(x=>{const d=x.m.date, hd=d!==last?`<div class="dayhd">${esc(dayLabel(d))}</div>`:"";last=d;return hd+x.h;}).join("");
       return `<div class="card"><div class="row"><h2>Movimientos</h2>${rows.length?`<span class="small muted">${rows.length}</span>`:""}</div><div class="list">${rows.length?grouped:`<p class="empty">No registraste nada este mes.</p>`}</div>${rows.length>10?`<button class="btn ghost" type="button" id="movMore">${movAll?"Ver menos":"Ver los "+rows.length}</button>`:""}</div>`;})()}
-    <div class="card"><div class="row"><h2>¿En qué se fue?</h2>${ca.length?`<span class="small muted">Toca una categoría</span>`:""}</div>
+    <div class="card"><div class="row"><h2>¿En qué se fue?</h2>${ca.length?``:""}</div>
       ${ca.length?donutHTML(ca,v):`<p class="empty">Sin gastos este mes.</p>`}
     </div>
     ${budgetCard(t.gasto)}
@@ -1398,13 +1395,13 @@ function contribHTML(v,st){
   const orig=k=>{const u=uidOf(k), byCur={};aportes.filter(a=>a.viaje===v.id&&a.who===k).forEach(a=>{byCur[a.cur]=(byCur[a.cur]||0)+apSigned(a);});return Object.keys(byCur).map(c=>money(byCur[c],c)).join(" + ");};
   return `<div class="contrib">${["p1","p2"].map(k=>{const pc=tot>0?st.by[k]/tot*100:0, o=orig(k);
     return `<div class="crow"><span class="cn"><i class="dot ${k}"></i>${esc(pname(k))}</span><span class="cv num"><b>${money(st.by[k],v.cur)}</b>${o&&o!==money(st.by[k],v.cur)?`<small>puso ${esc(o)}</small>`:""}</span><span class="cp num">${Math.round(pc)}%</span></div>`;}).join("")}
-    <small class="muted">% de lo ahorrado hasta ahora. Todo convertido a ${sym(v.cur)}, la moneda del viaje.</small></div>`;
+    </div>`;
 }
 function tripBudgetHTML(v,st){
   const b=v.budget||[]; if(!b.length) return "";
   const tot=v.target||0, s=budgetSummary(v), avail=st.saved-s.paid, F=budgetFunding(v,st.saved).rows;
   return `<div class="field"><div class="row"><span class="lab">Prioridades</span><span class="small muted">${s.n} de ${b.length} comprado${b.length===1?"":"s"}</span></div>
-    <span class="small muted">El ahorro llena primero lo más importante, en este orden. Cámbialo en «Editar». Toca un rubro cuando lo compren.</span>
+    
     <div class="blist">${b.map((x,i)=>{const c=budgetCost(x), pc=tot>0?c/tot*100:0, fr=F[i];
       return `<button type="button" class="bitem${x.bought?" on":""}" data-bitem="${i}" aria-pressed="${x.bought}" aria-label="${esc(x.name)}: ${x.bought?"comprado":"ahorrado "+money(fr.funded,v.cur)+" de "+money(x.amount,v.cur)}">
         <span class="prio" aria-hidden="true">${x.bought?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':i+1}</span>
@@ -1423,7 +1420,7 @@ function bindTripBudget(v){
     document.querySelectorAll(".bpay").forEach(o=>{if(o!==box){o.hidden=true;o.innerHTML="";}});
     if(!box.hidden){box.hidden=true;box.innerHTML="";return;}
     box.hidden=false;
-    box.innerHTML=x.bought?`<span class="small muted">¿Lo desmarcas? Volverá a «Falta comprar».</span><button class="btn ghost sm" type="button" id="bp-undo">Desmarcar</button>`
+    box.innerHTML=x.bought?`<span></span><button class="btn ghost sm" type="button" id="bp-undo">Desmarcar</button>`
       :`<div class="field" style="gap:4px"><label for="bp-amt" class="small">¿Cuánto pagaron? (${sym(v.cur)})</label><input id="bp-amt" type="number" inputmode="decimal" min="0" step="0.01" value="${x.amount||""}" placeholder="0.00"></div><button class="btn limebtn sm" type="button" id="bp-ok">Comprado</button>`;
     const save=async nb=>{const data={name:v.name,target:Math.round(nb.reduce((s,b)=>s+budgetCost(b),0)*100)/100,budget:nb,cur:v.cur,date:v.date,place:v.place,created:v.created||Date.now()};
       try{await db.doc("viajes/"+v.id).set(data);}catch(e){toast(errMsg(e));return false;} return true;};
@@ -1454,7 +1451,7 @@ function openTripSheet(id,keepOpen){
           <div class="tile-s"><span class="k">Meta (total)</span><span class="v">${moneyShort(v.target,v.cur)}</span></div>
           <div class="tile-s"><span class="k">Falta ahorrar</span><span class="v">${moneyShort(st.remaining,v.cur)}</span></div></div>`}
           ${st.perWeek!==null&&st.remaining>0?`<p class="small muted" style="margin:0">Para llegar a tiempo: <b style="color:var(--ink)" class="num">${money(st.perWeek,v.cur)}</b> por semana entre las dos, unos ${money(conv(st.perWeek/2,v.cur,cfg.p1.cur),cfg.p1.cur)} ${esc(pname("p1"))} y ${money(conv(st.perWeek/2,v.cur,cfg.p2.cur),cfg.p2.cur)} ${esc(pname("p2"))}.</p>`:""}
-          ${st.remaining===0?`<p class="small" style="margin:0;color:var(--good)">¡Meta cumplida!</p>`:""}`:`<p class="small muted" style="margin:0">Pónganle un monto meta para ver cuánto ahorrar por semana.</p>`}
+          ${st.remaining===0?`<p class="small" style="margin:0;color:var(--good)">¡Meta cumplida!</p>`:""}`:``}
         ${me?`<div class="grid2"><button class="btn limebtn" type="button" data-aportar="${esc(v.id)}">+ Ahorrar</button><button class="btn ghost" type="button" data-sacar="${esc(v.id)}">Sacar dinero</button></div>`:""}
 `;
   document.getElementById("tr-close").onclick=closeSheet;
@@ -1478,8 +1475,8 @@ function renderViajes(){
           <div class="tx num"><b class="tripamt">${money(st.saved,v.cur)}</b><span class="small muted">${v.target>0?`de ${moneyShort(v.target,v.cur)}${st.remaining>0?` · faltan ${moneyShort(st.remaining,v.cur)}`:" · ¡meta cumplida!"}`:"sin meta"}</span></div></div>
         ${coverHTML(v,st)}
         <div class="row small"><span class="tripwho num"><i class="dot p1"></i>${esc(pname("p1"))} ${moneyShort(st.by.p1,v.cur)} <i class="dot p2"></i>${esc(pname("p2"))} ${moneyShort(st.by.p2,v.cur)}</span>${me&&!past?`<button class="btn limebtn sm" type="button" data-aportar="${esc(v.id)}">+ Ahorrar</button>`:""}</div>
-      </div>`;}).join(""):`<div class="card"><p class="muted" style="margin:0">Todavía no hay viajes. Creen uno con su fecha y cuánto necesitan (pasajes, estadía, gastos) y empiecen a ahorrar juntas.</p>`}
-    ${orphan.length?`<div class="card"><h2>Ahorros sin viaje</h2><p class="small muted" style="margin:0">Toca uno tuyo para asignarle un viaje y que se sume.</p><div class="list">${orphan.sort(sortByDate).map(a=>aporteItemHTML(a)).join("")}</div></div>`:""}
+      </div>`;}).join(""):`<div class="card"><p class="muted" style="margin:0">Aún no hay viajes.</p></div>`}
+    ${orphan.length?`<div class="card"><h2>Ahorros sin viaje</h2><div class="list">${orphan.sort(sortByDate).map(a=>aporteItemHTML(a)).join("")}</div></div>`:""}
     <div class="card"><h2>Historial de ahorros</h2><div class="list">${all.length?all.map(a=>aporteItemHTML(a)).join(""):`<p class="empty">Aún no hay ahorros.</p>`}</div></div>
   </div>`;
   document.getElementById("newViaje").onclick=()=>openViajeSheet(null);
@@ -1503,10 +1500,10 @@ function renderAjustes(){
     <section class="card"><h2>Pareja y acceso</h2>
       ${["p1","p2"].map(k=>`<div class="partner"><span class="av ${k}" style="width:40px;height:40px;font-size:16px">${esc(pname(k).slice(0,1).toUpperCase())}</span><span class="tx"><b>${esc(pname(k))}${k===me?" (tú)":""}</b><small>${esc(cityName(c[k].tz))} · ${sym(c[k].cur)}</small></span>${statusPill(k)}</div>`).join("")}
       ${!joined.p2&&me==="p1"?`<div class="tile-s" style="gap:8px;padding:14px" id="inviteBox"><b style="font-weight:600">Código para tu pareja</b>
-        <span class="small muted">Ella crea su cuenta en Closeby, elige «Tengo un código» y lo escribe. Sirve una vez y vence en 24 horas.</span>
+        <span class="small muted">Vence en 24 horas.</span>
         <div class="invcode num" id="invCode">…</div>
         <div class="row" style="gap:8px;justify-content:flex-start;flex-wrap:wrap"><button class="btn sm" type="button" id="invShare">Compartir</button><button class="btn ghost sm" type="button" id="invNew">Generar otro</button></div></div>`:""}
-      <p class="small muted" style="margin:0">Las dos ven los viajes y los ahorros para viajes. Los ingresos, gastos, categorías y presupuesto de cada una son privados.</p>
+      
     </section>
 
     <section class="card"><h2>Tu cuenta</h2>
@@ -1515,8 +1512,8 @@ function renderAjustes(){
     </section>
     <form class="card" id="cfgForm"><fieldset><legend>Monedas</legend>
       <div class="grid2"><div class="field"><label for="s-rate">1 C$ equivale a S/</label><input id="s-rate" type="number" inputmode="decimal" min="0.01" step="0.01" value="${c.rate}"></div><div class="field"><label for="s-usd">1 US$ equivale a S/</label><input id="s-usd" type="number" inputmode="decimal" min="0.01" step="0.01" value="${c.usd}"></div></div>
-      <p class="small muted" style="margin:-4px 0 0">${c.ratesUpdated?`Actualizado el ${esc(fmtDate(c.ratesUpdated,{day:"numeric",month:"long",year:"numeric"}))}.`:"Sin fecha de actualización."} Revísenlo cada tanto para que las conversiones salgan bien.</p>
-      ${me?`<div class="field"><label for="s-mycur">Mi moneda</label>${curSelect("s-mycur",c[me].cur)}<span class="small muted">Es la que aparece primero al registrar y en la que ves tus totales. Solo cambia la tuya.</span></div>`:""}
+      <p class="small muted" style="margin:-4px 0 0">${c.ratesUpdated?`Actualizado el ${esc(fmtDate(c.ratesUpdated,{day:"numeric",month:"long",year:"numeric"}))}.`:"Sin fecha de actualización."}</p>
+      ${me?`<div class="field"><label for="s-mycur">Mi moneda</label>${curSelect("s-mycur",c[me].cur)}</div>`:""}
       <p class="err" id="cfgErr"></p>
       <button class="btn block" type="submit">Guardar monedas</button>
     </fieldset></form>
@@ -1528,21 +1525,21 @@ function renderAjustes(){
       <span class="small muted">Ingresos</span><div class="chips">${chipList(catsIngreso(),"ingreso")}</div>
       <div class="addrow"><input id="newCatI" maxlength="24" placeholder="Nueva categoría de ingreso" aria-label="Nueva categoría de ingreso"><button class="btn ghost" type="button" id="addCatI">Agregar</button></div>
       <button class="link small" type="button" id="resetCats" style="align-self:flex-start">Volver a las categorías originales</button>
-      <p class="small muted" style="margin:0">Quitar una categoría no borra los movimientos que ya la usan.</p>
+      
     </section>
 
     <form class="card" id="budgetForm"><div class="row"><h2>Presupuesto mensual</h2><span class="lockpill">${ICON_LOCK} Solo tú</span></div>
       <div class="amount-row"><input id="b-amt" type="number" inputmode="decimal" min="0" step="1" placeholder="Sin límite" value="${b.amount||""}" aria-label="Límite de gasto mensual"><select id="b-cur" aria-label="Moneda del presupuesto">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${b.cur===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div>
-      <p class="small muted" style="margin:0">Límite para tus gastos de cada mes. En Mis finanzas verás cuánto te queda y te aviso al llegar al 80%. Déjalo vacío para no usar presupuesto.</p>
+      
       <button class="btn block" type="submit">Guardar presupuesto</button>
     </form>
 
     <section class="card"><h2>Mis datos</h2>
       <button class="btn ghost block" type="button" id="exportCsv">Descargar mis movimientos (CSV)</button>
-      <p class="small muted" style="margin:0">Incluye tus ingresos, gastos y ahorros. Se abre en Excel o Google Sheets.</p>
+      
       <div class="danger-zone">
         <b style="font-weight:600">Empezar de cero</b>
-        <span class="small muted">Útil para borrar tus pruebas. No se puede deshacer y no toca lo que registró ${esc(pname(other))}.</span>
+        <span class="small muted">No se puede deshacer.</span>
         <button class="btn danger block" type="button" id="wipeMine">Borrar mis ingresos y gastos (${mine.length})</button>
         <button class="btn danger block" type="button" id="wipeAportes">Borrar mis ahorros para viajes (${aportes.filter(x=>x.owner===uid).length})</button>
       </div>
@@ -1551,7 +1548,7 @@ function renderAjustes(){
     <section class="card"><h2>Acerca de Closeby</h2>
       <a class="setrow" href="#perfil"><span>Mi perfil, ciudad y moneda</span><span aria-hidden="true">›</span></a>
       <a class="setrow" href="#perfil"><span>Apariencia (claro u oscuro)</span><span aria-hidden="true">›</span></a>
-      <p class="small muted" style="margin:0">Cada una entra con su propio correo: nadie puede hacerse pasar por la otra, y solo quien registra algo puede editarlo o borrarlo.</p>
+      
     </section>
   </div>`;
   document.getElementById("cfgForm").onsubmit=saveCfg;
@@ -1852,7 +1849,7 @@ function weekHTML(){
     </div></div>
     </div></div>
     <div class="legend small toneleg"><span><span class="sw"><i style="background:#2F6BFF"></i><i style="background:#E11D48"></i></span>Intenso: ${esc(pname("p1"))}</span><span><span class="sw"><i style="background:color-mix(in srgb,#2F6BFF 24%,var(--card));box-shadow:inset 0 0 0 1.5px #2F6BFF"></i><i style="background:color-mix(in srgb,#E11D48 24%,var(--card));box-shadow:inset 0 0 0 1.5px #E11D48"></i></span>Claro: ${esc(pname("p2"))}</span></div>
-    <p class="small muted" style="margin:0">Horas en tu zona (${esc(cityName(viewerTz()))}). Toca un espacio vacío para agregar una actividad a esa hora.</p>
+    
   </section>`;
 }
 let calSwipeIn=0, nowT="";
@@ -1943,7 +1940,7 @@ function renderCalendario(){
         <p class="small" style="margin:0">${g.ranges.length?`Libres las dos: <b class="num">${rangesText(g.ranges)}</b>`:"Este día no coinciden libres."}</p>
         <div class="legend small"><span><i class="dot" style="background:var(--p1)"></i>${esc(pname("p1"))} ocupada</span><span><i class="dot" style="background:var(--p2)"></i>${esc(pname("p2"))} ocupada</span><span><i class="dot" style="background:var(--ink)"></i>Libres las dos</span></div>
         `:""}
-        <p class="small muted" style="margin:0">Se calcula con las actividades que tienen hora de inicio y fin. Es solo una sugerencia.</p>
+        
       </div>
     </section>
 
@@ -2045,7 +2042,7 @@ function openActSheet(act,preset){
     <div class="field"><label for="e-note">Nota (opcional)</label><input id="e-note" maxlength="140" value="${esc(e.note)}"></div>
     <div class="field"><span class="lab">¿Quién la ve?</span>
       <div class="seg" id="e-vis"><button type="button" data-v="private" aria-pressed="${e.vis==="private"}">${ICON_LOCK} Solo yo</button><button type="button" data-v="shared" aria-pressed="${e.vis==="shared"}">Compartir con ${esc(pname(other))}</button></div>
-      <span class="small muted">${e.vis==="private"?`${esc(pname(other))} no podrá verla. Solo cuenta como «ocupada» en tu propio cálculo de llamadas.`:`${esc(pname(other))} la verá en su calendario, pero solo tú puedes editarla o borrarla.`}</span>
+
     </div>
     <p class="small muted" style="margin:0" id="e-conv"></p>
     <p class="err" id="e-err"></p>
@@ -2176,10 +2173,10 @@ function renderPerfil(){
       <div class="palpick">${PALETTES.map(([k,l,c])=>`<button type="button" class="palopt press" data-pal="${k}" aria-pressed="${getPalette()===k}"><span class="palsw">${c.map(x=>`<i style="background:${x}"></i>`).join("")}</span>${l}</button>`).join("")}</div>
       <span class="small muted">Modo</span>
       <div class="seg" id="themeSeg">${THEMES.map(([k,l])=>`<button type="button" data-theme-opt="${k}" aria-pressed="${theme===k}">${l}</button>`).join("")}</div>
-      <p class="small muted" style="margin:0">Los colores se guardan en tu cuenta y solo cambian tu app, no la de ${esc(pname(me==="p1"?"p2":"p1"))}. El modo Automático sigue el de tu celular.</p>
+      
     </div>
     <div class="card" id="homeIconCard"><h2>Instalar en tu celular</h2>
-      <p class="small muted" style="margin:0">Elige el ícono antes de instalar:</p>
+      
       <div class="iconpick">${ICON_SETS.map(([k,l])=>`<button type="button" class="icopt press" data-ico="${k}" aria-pressed="${homeIcon===k}">${appIconSVG(k)}<span>${l}</span></button>`).join("")}</div>
       ${window.matchMedia("(display-mode: standalone)").matches||navigator.standalone?`<p class="small" style="margin:0;color:var(--good)">✓ Ya la tienes instalada. Para cambiar el ícono, bórrala de la pantalla de inicio y vuelve a instalarla.</p>`:`<ol class="steps small">
         <li>Abre Closeby en <b>Safari</b> (en iPhone tiene que ser Safari).</li>
@@ -2188,7 +2185,7 @@ function renderPerfil(){
         <li>Toca <b>Añadir</b>. Ábrela siempre desde ese ícono.</li>
       </ol>`}
     </div>
-    <p class="small muted" style="margin:0;text-align:center">Entraste como ${esc((window.closeby&&window.closeby.email)||"")}. Solo tú puedes editar o borrar lo que registras.</p>
+    <p class="small muted" style="margin:0;text-align:center">${esc((window.closeby&&window.closeby.email)||"")}</p>
   </div>`;
   document.getElementById("openProf").onclick=openProfileSheet;
   document.getElementById("avEdit").onclick=openProfileSheet;
@@ -2210,15 +2207,15 @@ function openProfileSheet(){
     <div class="photorow"><span class="av ${me}" id="pf-av">${esc(pname(me).slice(0,1).toUpperCase())}</span><div class="acts">
       <label class="btn ghost sm" for="pf-photo" style="cursor:pointer">${photos[me]?"Cambiar foto":"Poner foto"}</label>
       <input id="pf-photo" type="file" accept="image/*" hidden>
-      ${photos[me]?`<button class="link small" type="button" id="pf-rmphoto">Quitar foto</button>`:`<span class="small muted">${esc(pname(me==="p1"?"p2":"p1"))} también la verá.</span>`}</div></div>
+      ${photos[me]?`<button class="link small" type="button" id="pf-rmphoto">Quitar foto</button>`:""}</div></div>
     <div class="field" id="pf-colors"><span class="lab">Tu color</span>
       <div class="colpick">${(()=>{const other=me==="p1"?"p2":"p1", mine=cfg[me].color||"", theirs=cfg[other].color||"";
         return PERSON_COLORS.map(([k,l,c])=>{const taken=k===theirs;return `<button type="button" class="colsw" data-col="${k}" aria-pressed="${k===mine}" ${taken?`disabled aria-label="${l}, lo usa ${esc(pname(other))}"`:`aria-label="${l}"`} style="--sw:${c}">${taken?`<span>${esc(pname(other).slice(0,1).toUpperCase())}</span>`:""}</button>`;}).join("");})()}</div>
-      <span class="small muted">Te identifica en los ahorros, el calendario y las barras. ${esc(pname(me==="p1"?"p2":"p1"))} también lo verá.</span></div>
+      </div>
     <form id="profForm" style="display:flex;flex-direction:column;gap:14px">
       <div class="field"><label for="pf-name">Nombre</label><input id="pf-name" maxlength="24" autocomplete="given-name" value="${esc(my.name)}"></div>
-      <div class="field"><label for="pf-bday">Tu cumpleaños</label><input id="pf-bday" type="date" value="${esc(my.birthday)}"><span class="small muted">Aparecerá en el calendario de las dos, cada año.</span></div>
-      <div class="field"><label for="pf-tz">Ciudad</label>${citySelect("pf-tz",my.tz)}<span class="small muted">Si te mudas por el Work and Travel, cámbiala y el reloj se ajusta solo.</span></div>
+      <div class="field"><label for="pf-bday">Tu cumpleaños</label><input id="pf-bday" type="date" value="${esc(my.birthday)}"></div>
+      <div class="field"><label for="pf-tz">Ciudad</label>${citySelect("pf-tz",my.tz)}</div>
       <p class="err" id="pf-err"></p>
       <button class="btn block" type="submit">Guardar mis datos</button>
     </form>`;
@@ -2362,13 +2359,10 @@ function drawSheet(){
     ${s.editing?"":`<div class="seg" id="f-type">${seg("gasto","Gasto")}${seg("ingreso","Ingreso")}${seg("aporte","Ahorro")}${seg("fondo","Fondo")}</div>`}
     ${s.type==="gasto"?`<div class="seg" id="f-acct"><button type="button" data-acct="debito" aria-pressed="${s.acct!=="credito"}">Débito o efectivo</button><button type="button" data-acct="credito" aria-pressed="${s.acct==="credito"}">Tarjeta de crédito</button></div>`:""}
     ${s.type==="aporte"&&!(s.editing&&s.dest&&s.dest.startsWith("p:"))?`<div class="seg" id="f-adir"><button type="button" data-adir="in" aria-pressed="${s.adir!=="out"}">Poner dinero</button><button type="button" data-adir="out" aria-pressed="${s.adir==="out"}">Sacar dinero</button></div>`:""}
-    <p class="small muted" style="margin:0">${s.type==="aporte"&&s.adir==="out"?`Vuelve a «Tienes para gastar». No se borra nada: queda registrado que lo sacaste${s.dest&&s.dest.startsWith("v:")?" y lo verán las dos":""}.`
-      :s.type==="gasto"&&s.acct==="credito"?`${LOCK} Cuenta como gasto del mes, pero no baja «Tienes para gastar» hasta que pagues la tarjeta.`
-      :s.type==="aporte"?(s.dest&&s.dest.startsWith("v:")?`Ahorro para un viaje: lo verán las dos.`:`${LOCK} Va a tus ahorros: solo tú lo ves y sale de «Tienes para gastar».`)
-      :s.type==="fondo"?`${LOCK} Dinero que no es tuyo para gastar. No suma ni resta a tu saldo.`:`${LOCK} Privado: solo tú verás este ${s.type}.`}</p>
+
     ${s.type==="aporte"&&!s.editing?`<div class="field"><span class="lab">${s.adir==="out"?"¿De dónde lo sacas?":"¿A dónde va este ahorro?"}</span>
       ${vs.length?`<span class="small muted">Viajes (compartido)</span><div class="chips" id="f-dest">${vs.map(v=>`<button type="button" data-dest="v:${esc(v.id)}" aria-pressed="${s.dest==="v:"+v.id}">${ICON_PLANE} ${esc(v.name)}</button>`).join("")}</div>`:""}
-      <span class="small muted">Mis ahorros (solo tú)</span><div class="chips" id="f-dest2">${pots().map(p=>`<button type="button" data-dest="p:${esc(p.id)}" aria-pressed="${s.dest==="p:"+p.id}">${esc(p.name)}</button>`).join("")}${s.adir==="out"?"":`<button type="button" class="addchip" id="f-newpot">+ Nuevo ahorro</button>`}</div></div>`
+      <span class="small muted">Mis ahorros</span><div class="chips" id="f-dest2">${pots().map(p=>`<button type="button" data-dest="p:${esc(p.id)}" aria-pressed="${s.dest==="p:"+p.id}">${esc(p.name)}</button>`).join("")}${s.adir==="out"?"":`<button type="button" class="addchip" id="f-newpot">+ Nuevo ahorro</button>`}</div></div>`
     :s.type==="aporte"?`<div class="field"><span class="lab">Viaje</span><div class="chips" id="f-dest">${vs.map(v=>`<button type="button" data-dest="v:${esc(v.id)}" aria-pressed="${s.dest==="v:"+v.id}">${esc(v.name)}</button>`).join("")}</div></div>`:""}
     ${s.type==="fondo"?`<div class="seg" id="f-fdir"><button type="button" data-d="in" aria-pressed="${s.fdir==="in"}">Recibí dinero</button><button type="button" data-d="out" aria-pressed="${s.fdir==="out"}">Usé dinero</button></div>
       <div class="field"><span class="lab">¿Qué fondo?</span><div class="chips" id="f-fund">${funds().map(f=>`<button type="button" data-fund="${esc(f.id)}" aria-pressed="${s.fund===f.id}">${esc(f.name)}</button>`).join("")}<button type="button" class="addchip" id="f-newfund">+ Nuevo fondo</button></div></div>`:""}
@@ -2467,7 +2461,7 @@ function openViajeSheet(v){
       <div class="field" style="grid-column:1/-1"><label for="v-cur">Moneda del presupuesto</label>${curSelect("v-cur",x.cur)}</div>
     </div>
     <div class="field"><span class="lab">Presupuesto</span>
-      <span class="small muted">Vuelos, hotel y comida van siempre; lo demás es opcional. La meta es la suma de todo. El orden es la prioridad: lo ahorrado llena primero el número 1. Usa ↑ ↓ para cambiarlo.</span>
+      
       <div class="bud" id="v-bud"></div>
       <div class="chips" id="v-addb"></div>
       <div class="budtotal"><span>Total del viaje</span><b id="v-total">0</b></div>
