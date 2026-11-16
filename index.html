@@ -492,6 +492,14 @@ button.sblock{cursor:pointer}
 .cdpill small{font-size:10px;font-weight:600;margin-top:2px}
 .cdpill.past{background:var(--chip);color:var(--muted)}
 .cover{display:flex;gap:3px;height:14px}
+.lime .cover>span{background:rgba(20,19,23,.14)} .lime .cover>span>i,.lime .cover>span.on>i{background:#141317}
+.lime .covlab{color:rgba(20,19,23,.7)} .lime .covlab b,.lime .covlab .ok{color:#141317}
+@keyframes freshIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+@keyframes freshBg{0%,40%{background:color-mix(in srgb,var(--lime) 55%,transparent)}100%{background:transparent}}
+.item.fresh{animation:freshIn 380ms cubic-bezier(0.23, 1, 0.32, 1) both, freshBg 1.6s ease-out both;border-radius:14px}
+@media (prefers-reduced-motion: reduce){.item.fresh{animation:freshBg 1.2s ease-out both}}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
+.confetti i{position:absolute;left:50%;bottom:30%;width:9px;height:14px;border-radius:3px}
 .cover>span{position:relative;display:block;height:100%;border-radius:6px;background:var(--chip);overflow:hidden;min-width:6px}
 .cover>span>i{position:absolute;left:0;top:0;bottom:0;display:block;background:var(--lila);border-radius:6px}
 .cover>span.on>i{background:var(--good)}
@@ -757,6 +765,16 @@ function coverHTML(v,st){
   return `<div class="cover" role="img" aria-label="Cobertura del presupuesto">${rows.map(x=>`<span class="${x.bought?"on":""}" style="flex:${Math.max(x.cost,v.target*0.04)} 1 0" title="${esc(x.name)}"><i data-grow="bar" data-ak="cv:${esc(v.id)}:${esc(x.id)}" style="width:${Math.round(x.pct*1000)/10}%"></i></span>`).join("")}</div>
     <div class="covlab">${done.length?`<span class="ok">✓ ${done.map(x=>esc(x.name)).join(", ")}</span>`:""}${next?`<span>Ahora llenando: <b>${esc(next.name)}</b> · faltan ${moneyShort(next.amount-next.funded,v.cur)}</span>`:`<span class="ok">Todo cubierto</span>`}</div>`;
 }
+function celebrate(msg){
+  toast(msg);
+  if(reducedMotion()) return;
+  const box=document.createElement("div"); box.className="confetti"; box.setAttribute("aria-hidden","true");
+  const cols=["var(--lime)","var(--lila)","var(--p1)","var(--p2)","#FFFFFF"];
+  for(let i=0;i<26;i++){const e=document.createElement("i"); e.style.background=cols[i%cols.length]; box.appendChild(e);
+    const ang=(-90+(Math.random()*110-55))*Math.PI/180, dist=220+Math.random()*220, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist, rot=(Math.random()*720-360)|0;
+    e.animate([{transform:"translate(-50%,0) rotate(0) scale(.6)",opacity:1},{transform:`translate(calc(-50% + ${dx}px),${dy}px) rotate(${rot/2}deg) scale(1)`,opacity:1,offset:.55},{transform:`translate(calc(-50% + ${dx*1.15}px),${dy+260}px) rotate(${rot}deg) scale(.9)`,opacity:0}],{duration:1300+Math.random()*400,easing:"cubic-bezier(0.23, 1, 0.32, 1)",fill:"forwards"});}
+  document.body.appendChild(box); setTimeout(()=>box.remove(),1900);
+}
 function growIn(root){
   if(!root||reducedMotion()) return;
   root.querySelectorAll('[data-grow="bar"]').forEach((el,i)=>el.animate([{transform:"scaleX(0)"},{transform:"scaleX(1)"}],{duration:650,delay:80+i*40,easing:"cubic-bezier(0.23, 1, 0.32, 1)",fill:"backwards",transformOrigin:"left"}));
@@ -828,7 +846,7 @@ function tickClocks(){
 }
 function barHTML(v,st){
   const t=v.target>0?v.target:1, w1=Math.min(100,st.by.p1/t*100), w2=Math.min(100-w1,st.by.p2/t*100);
-  return `<div class="bar" role="img" aria-label="${Math.round(st.pct*100)}% ahorrado"><span class="p1" data-ak="v:${esc(v.id)}:p1" style="width:${w1}%"></span><span class="p2" data-ak="v:${esc(v.id)}:p2" style="width:${w2}%"></span></div>`;
+  return `<div class="bar" role="img" aria-label="${Math.round(st.pct*100)}% ahorrado"><span class="p1" data-grow="bar" data-ak="v:${esc(v.id)}:p1" style="width:${w1}%"></span><span class="p2" data-grow="bar" data-ak="v:${esc(v.id)}:p2" style="width:${w2}%"></span></div>`;
 }
 function countHTML(){
   const v=nextViaje();
@@ -844,7 +862,7 @@ function countHTML(){
 function aporteItemHTML(a,mineView){
   const v=viajeById(a.viaje);
   const conv2=a.cur!==viewCur()?`<small>≈ ${money(conv(a.amount,a.cur,viewCur()),viewCur())}</small>`:"";
-  return `<button class="item" type="button" data-aporte="${esc(a.id)}" data-owner="${esc(a.owner)}">
+  return `<button class="item${fr(a)}" type="button" data-aporte="${esc(a.id)}" data-owner="${esc(a.owner)}">
     ${mineView?`<span class="av mvic trip" aria-hidden="true">${ICON_PLANE}</span>`:`<span class="av ${a.who}" aria-hidden="true">${esc(pname(a.who).slice(0,1).toUpperCase())}</span>`}
     <span class="t"><b>${esc(a.note||((a.out?"Sacado · ":"Ahorro · ")+(v?v.name:"sin viaje")))}</b><small>${mineView?(a.out?"Sacaste del viaje · ":"Ahorro para viaje · "):esc(pname(a.who))+(a.out?" sacó · ":" · ")}${esc(v?v.name:"Sin viaje asignado")} · ${esc(fmtDate(a.date))}</small></span>
     <span class="amt"><b class="${a.out?"neg":"pos"}">${a.out?"− ":"+ "}${money(a.amount,a.cur)}</b>${conv2}</span></button>`;
@@ -854,19 +872,21 @@ function fundName(id){const p=funds().find(x=>x.id===id);return p?p.name:"Fondo"
 const ICON_IN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg>';
 const ICON_OUT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
 const ICON_CARD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg>';
+let freshTs=0;
+const fr=m=>freshTs&&m.created===freshTs?" fresh":"";
 function personalItemHTML(m){
-  if(m.type==="card_pay") return `<button class="item" type="button" data-personal="${esc(m.id)}"><span class="av mvic card" aria-hidden="true">${ICON_CARD}</span>
+  if(m.type==="card_pay") return `<button class="item${fr(m)}" type="button" data-personal="${esc(m.id)}"><span class="av mvic card" aria-hidden="true">${ICON_CARD}</span>
       <span class="t"><b>${esc(m.note||"Pago de tarjeta")}</b><small>Pago de tarjeta · ${esc(fmtDate(m.date))}</small></span>
       <span class="amt"><b class="neg">− ${money(m.amount,m.cur)}</b></span></button>`;
   if(m.type!=="ingreso"&&m.type!=="gasto"){
     const isPot=m.type.startsWith("pot"), inn=m.type.endsWith("_in"), nm=isPot?potName(m.ref):fundName(m.ref);
     const lbl=isPot?(inn?"Guardaste en":"Sacaste de"):(inn?"Recibiste en":"Usaste de");
-    return `<button class="item" type="button" data-personal="${esc(m.id)}"><span class="av ${isPot?"potic":"fundic"}" aria-hidden="true">${isPot?ICON_PIG:ICON_FUND}</span>
+    return `<button class="item${fr(m)}" type="button" data-personal="${esc(m.id)}"><span class="av ${isPot?"potic":"fundic"}" aria-hidden="true">${isPot?ICON_PIG:ICON_FUND}</span>
       <span class="t"><b>${esc(m.note||nm)}</b><small>${lbl} ${esc(nm)} · ${esc(fmtDate(m.date))}</small></span>
       <span class="amt"><b class="${inn?"pos":"neg"}">${inn?"+ ":"− "}${money(m.amount,m.cur)}</b></span></button>`;
   }
   const conv2=m.cur!==viewCur()?`<small>≈ ${money(conv(m.amount,m.cur,viewCur()),viewCur())}</small>`:"";
-  return `<button class="item" type="button" data-personal="${esc(m.id)}">
+  return `<button class="item${fr(m)}" type="button" data-personal="${esc(m.id)}">
     <span class="av mvic ${m.type==="ingreso"?"in":m.acct==="credito"?"card":"out"}" aria-hidden="true">${m.type==="ingreso"?ICON_IN:m.acct==="credito"?ICON_CARD:ICON_OUT}</span>
     <span class="t"><b>${esc(m.note||m.cat)}</b><small>${esc(m.note?m.cat+" · ":"")}${m.type==="ingreso"?"Ingreso":m.acct==="credito"?"Con tarjeta":"Gasto"} · ${esc(fmtDate(m.date))}</small></span>
     <span class="amt"><b class="${m.type==="ingreso"?"pos":"neg"}">${m.type==="ingreso"?"+ ":"− "}${money(m.amount,m.cur)}</b>${conv2}</span></button>`;
@@ -905,6 +925,7 @@ function renderInicio(){
       <div class="fig num"><span class="nw"><small style="font-size:clamp(16px,7cqi,26px);opacity:1">${sym(focus.cur)}&nbsp;</small><span data-num="h:${esc(focus.id)}" data-val="${Math.round(st.saved)}">${Math.round(st.saved).toLocaleString("es-PE")}</span></span>${tg>0?`<small>/${Math.round(tg).toLocaleString("es-PE")}</small>`:""}</div>
       ${tg>0?`<div class="stripe" role="img" aria-label="${Math.round(st.pct*100)}% ahorrado">${w1>0?`<i class="p1" data-ak="h:${esc(focus.id)}:p1" style="width:${w1}%"></i>`:""}${w2>0?`<i class="p2" data-ak="h:${esc(focus.id)}:p2" style="width:${w2}%"></i>`:""}</div>`:""}
       <div class="foot num"><span>${esc(pname("p1"))} ${moneyShort(st.by.p1,focus.cur)} · ${esc(pname("p2"))} ${moneyShort(st.by.p2,focus.cur)}</span><b>${tg>0?Math.round(st.pct*100)+"%":"sin meta"}</b></div>
+      ${coverHTML(focus,st)}
       ${me?`<button class="cta press" type="button" data-aportar="${esc(focus.id)}">+ Ahorrar para este viaje</button>`:""}
     </section>`;
   }else{
@@ -1343,7 +1364,7 @@ function bindDonut(root){
     document.getElementById("dcv").textContent=on?b.dataset.v:tv; document.getElementById("dcl").textContent=on?b.dataset.l:"gastado";
   });
 }
-let dineroGrow=false, viajesGrow=false;
+let dineroGrow=false, viajesGrow=false; const grownTabs=new Set();
 function shiftMonth(d){const [y,m]=month.split("-").map(Number),dt=new Date(y,m-1+d,1);month=dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0");dineroGrow=true;renderDinero();}
 
 /* ---------- Viajes (compartido) ---------- */
@@ -2113,7 +2134,7 @@ function renderPerfil(){
     <div class="card">
       <div class="row"><h2>Tu parte en cada viaje</h2><a class="link small" href="#viajes">Ver viajes</a></div>
       ${byTrip.length?byTrip.map(({v,st,mineV})=>{const half=v.target>0?v.target/2:0;const p=half>0?Math.min(100,mineV/half*100):0;
-        return `<div class="mbar"><div class="row"><span>${esc(v.name)}</span><span class="muted num">${moneyShort(mineV,v.cur)}${half>0?" de "+moneyShort(half,v.cur):""}</span></div>${half>0?`<div class="track"><i style="width:${p}%;background:var(--${me})"></i></div><span class="small muted">${Math.round(p)}% de tu mitad</span>`:""}</div>`;}).join(""):`<p class="empty">Todavía no tienes ahorros en ningún viaje.</p>`}
+        return `<div class="mbar"><div class="row"><span>${esc(v.name)}</span><span class="muted num">${moneyShort(mineV,v.cur)}${half>0?" de "+moneyShort(half,v.cur):""}</span></div>${half>0?`<div class="track"><i data-grow="bar" style="width:${p}%;background:var(--${me})"></i></div><span class="small muted">${Math.round(p)}% de tu mitad</span>`:""}</div>`;}).join(""):`<p class="empty">Todavía no tienes ahorros en ningún viaje.</p>`}
     </div>
     <div class="card">
       <div class="row"><h2>Tu mes</h2><span class="lockpill">${ICON_LOCK} Solo tú</span></div>
@@ -2370,11 +2391,17 @@ function drawSheet(){
     if(s.type==="fondo"){ const f=funds().find(x=>x.id===s.fund); if(!f){err.textContent=funds().length?"Elige el fondo.":"Primero crea un fondo.";return;}
       if(s.fdir==="out"&&conv(amt,s.cur,f.cur)>boxBalance("fund",f)+0.005){err.textContent=`Solo quedan ${money(boxBalance("fund",f),f.cur)} en ${f.name}.`;return;} }
     const base={amount:Math.round(amt*100)/100,cur:s.cur,note:s.note.trim(),date:s.date,created:s.created||Date.now()};
+    if(!s.editing) freshTs=base.created;
+    let cheer="";
+    if(s.type==="aporte"&&s.adir!=="out"&&!s.editing&&s.viaje){const v=viajeById(s.viaje); if(v&&v.target>0){const st=viajeStats(v), add=conv(base.amount,base.cur,v.cur), ns=st.saved+add;
+      if(st.saved<v.target-0.005&&ns>=v.target-0.005) cheer=`¡Meta cumplida para ${v.name}!`;
+      else if((v.budget||[]).length){const a=budgetFunding(v,st.saved).rows, b=budgetFunding(v,ns).rows, done=b.find((x,i)=>!x.bought&&x.amount>0&&x.pct>=0.999&&a[i].pct<0.999); if(done) cheer=`¡${done.name} ya está ahorrado completo!`;}}}
     const btn=document.getElementById("f-save"); btn.disabled=true;
     try{
       if(s.type==="aporte"&&s.dest&&s.dest.startsWith("p:")){ const out=s.adir==="out"; await myPriv().add({...base,type:out?"pot_out":"pot_in",ref:s.dest.slice(2),cat:""}); closeSheet(); toast(out?"Listo, sacaste de "+potName(s.dest.slice(2)):"Guardado en "+potName(s.dest.slice(2))); return; }
       if(s.type==="fondo"){ await myPriv().add({...base,type:"fund_"+s.fdir,ref:s.fund,cat:""}); closeSheet(); toast(s.fdir==="in"?"Registrado en el fondo":"Uso del fondo registrado"); return; }
       if(s.type==="aporte"){ const data={...base,type:"aporte",viaje:s.viaje,out:s.adir==="out"}; s.id?await myAportes().doc(s.id).set(data):await myAportes().add(data);
+        if(cheer){closeSheet();celebrate(cheer);return;}
         if(data.out){closeSheet();toast("Listo, sacaste "+money(base.amount,base.cur)+" del viaje");return;} }
       else { const data={...base,type:s.type,cat:s.cat}; if(s.type==="gasto") data.acct=s.acct==="credito"?"credito":"debito"; s.id?await myPriv().doc(s.id).set(data):await myPriv().add(data);
         if(s.type==="gasto"){const l=catLimits()[s.cat];if(l){const lc=limitsCur(),ym=s.date.slice(0,7);
@@ -2537,7 +2564,7 @@ function showTab(t){
     const v=document.getElementById("v-"+t), dir=Math.sign(TAB_ORDER.indexOf(t)-TAB_ORDER.indexOf(fromTab))||1;
     if(v&&v.animate) v.animate(reducedMotion()?[{opacity:0},{opacity:1}]:[{opacity:0,transform:`translateX(${dir*14}px)`},{opacity:1,transform:"none"}],{duration:reducedMotion()?150:220,easing:"cubic-bezier(0.23, 1, 0.32, 1)"});
   }
-  if(fromTab!==t){ if(t==="dinero") growIn(document.getElementById("v-dinero")); if(t==="viajes") growIn(document.getElementById("v-viajes")); }
+  if(fromTab!==t&&!grownTabs.has(t)&&["dinero","viajes","perfil"].includes(t)){ grownTabs.add(t); growIn(document.getElementById("v-"+t)); }
   prevTabShown=t;
   document.getElementById("fab").hidden=!(t==="dinero"||t==="calendario")||!me;
   const chip=document.getElementById("meChip"); if(t==="perfil"||t==="ajustes") chip.setAttribute("aria-current","page"); else chip.removeAttribute("aria-current");
@@ -2593,6 +2620,7 @@ function renderAll(skipAjustes){
   if(!skipAjustes&&tab==="ajustes"){const f=document.activeElement;if(!(f&&f.closest&&f.closest("#v-ajustes")&&/^(INPUT|SELECT|TEXTAREA)$/.test(f.tagName)))renderAjustes();}
   if(!skipAjustes&&tab==="perfil"){const f=document.activeElement;if(!(f&&f.closest&&f.closest("#profForm")))renderPerfil();}
   runAnims();
+  if(freshTs) setTimeout(()=>{freshTs=0;},0);
 }
 
 document.addEventListener("click",e=>{
