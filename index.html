@@ -47,7 +47,7 @@ input[type=date]::-webkit-date-and-time-value,input[type=time]::-webkit-date-and
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit;color:inherit}
-html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior:none}
+html{scrollbar-width:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;overscroll-behavior:none}
 button{cursor:pointer;-webkit-tap-highlight-color:transparent}
 button,a,[role="button"],.item,.cday,.wkev,.chip,label.check{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .sheet,.wkscroll,#wkScroll{overscroll-behavior:contain}
@@ -98,6 +98,8 @@ html[data-scrolled] .top{background:color-mix(in srgb,var(--bg) 92%,transparent)
 .pagetitle{font-weight:400;letter-spacing:-.035em}
 h2{font-weight:600;letter-spacing:-.02em}.fig,.big-money{font-weight:600;letter-spacing:-.04em}
 .mvic{display:grid;place-items:center}.mvic svg{width:18px;height:18px}
+::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}
+.mvic.card{background:color-mix(in srgb,var(--lila) 16%,var(--card));color:var(--lila)}
 .mvic.trip{background:var(--soft);color:var(--on-lime)}.mvic.out{background:var(--chip);color:var(--ink)}.mvic.in{background:color-mix(in srgb,var(--good) 18%,var(--card));color:var(--good)}
 .sectitle{margin:10px 2px -2px;font-size:24px}
 .greet{margin:0 0 2px;font-size:24px;line-height:1.2;font-weight:400;letter-spacing:-.015em;color:var(--ink)}
@@ -471,6 +473,30 @@ button.sblock{cursor:pointer}
 .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--muted);opacity:.5;margin-right:2px;vertical-align:1px}
 .live.on{background:#22C55E;opacity:1;box-shadow:0 0 0 3px rgba(34,197,94,.22)}
 .pill.muted{color:var(--muted)}
+.bud{display:flex;flex-direction:column;gap:8px}
+.brow{display:grid;grid-template-columns:minmax(0,1fr) 116px 36px;gap:8px;align-items:center}
+.brow input{min-width:0}
+.brow .bx{width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:var(--chip);color:var(--muted);font-size:18px;line-height:1}
+.brow .req{font-size:15px;font-weight:600;padding-left:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.budtotal{display:flex;justify-content:space-between;align-items:baseline;background:var(--chip);border-radius:14px;padding:10px 12px;font-weight:600}
+.budtotal b{font-variant-numeric:tabular-nums;font-size:18px}
+.blist{display:flex;flex-direction:column;gap:2px;background:var(--chip);border-radius:16px;padding:6px}
+.bitem{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 6px;border-radius:12px;text-align:left;background:transparent;border:0;color:inherit;width:100%}
+.bitem .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex-shrink:0;color:#fff}
+.bitem.on .ck{background:var(--good);border-color:var(--good)}
+.bitem .bt{min-width:0;display:flex;flex-direction:column;gap:4px}
+.bitem .bt b{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bitem.on .bt b{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px}
+.bitem .bt small{font-size:12px;color:var(--muted)}
+.bitem .bar{height:5px;border-radius:999px;background:color-mix(in srgb,var(--muted) 22%,transparent);overflow:hidden}
+.bitem .bar i{display:block;height:100%;border-radius:999px;background:var(--lila)}
+.bitem.on .bar i{background:var(--good)}
+.bitem .ba{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.bitem .ba small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.bpay{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:2px 6px 10px 46px;align-items:end}
+.cardhero{display:flex;flex-direction:column;gap:4px;background:color-mix(in srgb,var(--lila) 12%,var(--chip));border-radius:18px;padding:14px}
+.cardhero small{color:var(--muted);font-size:13px}
+.cardhero b{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .addchip{border:1px dashed var(--muted)!important;background:transparent!important;color:var(--muted)}
 #f-dest button svg{width:13px;height:13px;vertical-align:-2px}
 .cday .dots{align-items:center}
@@ -621,10 +647,10 @@ function mergeCfg(d){
 }
 function cleanPersonal(id,d){
   if(!d||typeof d!=="object") return null;
-  const T=["ingreso","gasto","pot_in","pot_out","fund_in","fund_out"];
+  const T=["ingreso","gasto","pot_in","pot_out","fund_in","fund_out","card_pay"];
   const m={id, kind:"personal", type:T.includes(d.type)?d.type:"gasto", ref:typeof d.ref==="string"?d.ref:"", amount:Math.abs(num(d.amount,0)), cur:okCur(d.cur),
     cat:typeof d.cat==="string"?d.cat.slice(0,40):"Otros", note:typeof d.note==="string"?d.note.slice(0,120):"",
-    date:isDate(d.date)?d.date:todayStr(), created:num(d.created,0), who:me};
+    date:isDate(d.date)?d.date:todayStr(), created:num(d.created,0), who:me, acct:d.acct==="credito"?"credito":"debito"};
   return m.amount>0?m:null;
 }
 function cleanAporte(id,d,owner,slot){
@@ -632,14 +658,26 @@ function cleanAporte(id,d,owner,slot){
   if(d.type && d.type!=="aporte") return null;   // restos del formato anterior: no son ahorros
   const m={id, owner, kind:"aporte", type:"aporte", who:slot, amount:Math.abs(num(d.amount,0)), cur:okCur(d.cur),
     viaje:typeof d.viaje==="string"?d.viaje:"", note:typeof d.note==="string"?d.note.slice(0,120):"",
-    date:isDate(d.date)?d.date:todayStr(), created:num(d.created,0)};
+    date:isDate(d.date)?d.date:todayStr(), created:num(d.created,0), out:d.out===true};
   return m.amount>0?m:null;
 }
+function cleanBudget(a){
+  if(!Array.isArray(a)) return [];
+  return a.slice(0,30).filter(b=>b&&typeof b==="object"&&typeof b.name==="string"&&b.name.trim()).map((b,i)=>({
+    id:typeof b.id==="string"&&b.id?b.id.slice(0,24):"b"+i, name:b.name.trim().slice(0,30), amount:Math.max(0,num(b.amount,0)),
+    bought:b.bought===true, paid:b.paid==null||b.paid===""?null:Math.max(0,num(b.paid,0))}));
+}
+function budgetCost(b){return b.bought&&b.paid!=null?b.paid:b.amount;}
 function cleanViaje(id,d){
   if(!d||typeof d!=="object") return null;
-  return {id, name:(typeof d.name==="string"&&d.name.trim())?d.name.slice(0,40):"Viaje", target:Math.max(0,num(d.target,0)),
-    cur:okCur(d.cur), date:isDate(d.date)?d.date:"", place:typeof d.place==="string"?d.place.slice(0,40):"", created:num(d.created,0)};
+  const budget=cleanBudget(d.budget);
+  return {id, name:(typeof d.name==="string"&&d.name.trim())?d.name.slice(0,40):"Viaje",
+    target:budget.length?Math.round(budget.reduce((s,b)=>s+budgetCost(b),0)*100)/100:Math.max(0,num(d.target,0)),
+    budget, cur:okCur(d.cur), date:isDate(d.date)?d.date:"", place:typeof d.place==="string"?d.place.slice(0,40):"", created:num(d.created,0)};
 }
+function apSigned(a){return a.out?-a.amount:a.amount;}
+const BUD_REQ=["Vuelos","Hotel","Comida"], BUD_IDS=["vuelos","hotel","comida"], BUD_OPT=["Transporte","Actividades","Seguro de viaje","Regalos","Compras"];
+function budgetSummary(v){const b=v.budget||[];let paid=0,pend=0,n=0;b.forEach(x=>{if(x.bought){paid+=budgetCost(x);n++;}else pend+=x.amount;});return {paid,pend,n,count:b.filter(x=>x.amount>0||x.bought).length};}
 function solesPer(c){return c==="CAD"?cfg.rate:c==="USD"?cfg.usd:1;}
 function conv(a,from,to){ if(from===to) return a; return a*solesPer(from)/solesPer(to); }
 function sym(c){return c==="CAD"?"C$":c==="USD"?"US$":"S/";}
@@ -665,7 +703,8 @@ const LOCK=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="
 function viajeById(id){return viajes.find(v=>v.id===id)||null;}
 function viajeStats(v){
   let saved=0; const by={p1:0,p2:0};
-  aportes.forEach(a=>{ if(a.viaje===v.id){const x=conv(a.amount,a.cur,v.cur);saved+=x;by[a.who]+=x;} });
+  aportes.forEach(a=>{ if(a.viaje===v.id){const x=conv(apSigned(a),a.cur,v.cur);saved+=x;by[a.who]+=x;} });
+  saved=Math.max(0,saved); by.p1=Math.max(0,by.p1); by.p2=Math.max(0,by.p2);
   const remaining=Math.max(0,v.target-saved), days=daysUntil(v.date);
   const perWeek=(v.target>0&&days!==null&&days>0)?remaining/Math.max(1,days/7):null;
   return {saved,by,remaining,days,perWeek,pct:v.target>0?Math.min(1,saved/v.target):0};
@@ -685,7 +724,7 @@ function myMonthTotals(ym){
   const v=viewCur(),r={ingreso:0,gasto:0,ahorro:0};
   mine.forEach(m=>{ if(m.date.slice(0,7)!==ym) return; const a=conv(m.amount,m.cur,v);
     if(m.type==="ingreso"||m.type==="gasto") r[m.type]+=a; else if(m.type==="pot_in") r.ahorro+=a; else if(m.type==="pot_out") r.ahorro-=a; });
-  aportes.forEach(a=>{ if(a.owner===uid && a.date.slice(0,7)===ym) r.ahorro+=conv(a.amount,a.cur,v); });
+  aportes.forEach(a=>{ if(a.owner===uid && a.date.slice(0,7)===ym) r.ahorro+=conv(apSigned(a),a.cur,v); });
   return r;
 }
 
@@ -720,14 +759,18 @@ function aporteItemHTML(a,mineView){
   const conv2=a.cur!==viewCur()?`<small>≈ ${money(conv(a.amount,a.cur,viewCur()),viewCur())}</small>`:"";
   return `<button class="item" type="button" data-aporte="${esc(a.id)}" data-owner="${esc(a.owner)}">
     ${mineView?`<span class="av mvic trip" aria-hidden="true">${ICON_PLANE}</span>`:`<span class="av ${a.who}" aria-hidden="true">${esc(pname(a.who).slice(0,1).toUpperCase())}</span>`}
-    <span class="t"><b>${esc(a.note||("Ahorro · "+(v?v.name:"sin viaje")))}</b><small>${mineView?"Ahorro para viaje · ":esc(pname(a.who))+" · "}${esc(v?v.name:"Sin viaje asignado")} · ${esc(fmtDate(a.date))}</small></span>
-    <span class="amt"><b class="pos">+ ${money(a.amount,a.cur)}</b>${conv2}</span></button>`;
+    <span class="t"><b>${esc(a.note||((a.out?"Sacado · ":"Ahorro · ")+(v?v.name:"sin viaje")))}</b><small>${mineView?(a.out?"Sacaste del viaje · ":"Ahorro para viaje · "):esc(pname(a.who))+(a.out?" sacó · ":" · ")}${esc(v?v.name:"Sin viaje asignado")} · ${esc(fmtDate(a.date))}</small></span>
+    <span class="amt"><b class="${a.out?"neg":"pos"}">${a.out?"− ":"+ "}${money(a.amount,a.cur)}</b>${conv2}</span></button>`;
 }
 function potName(id){const p=pots().find(x=>x.id===id);return p?p.name:"Ahorro";}
 function fundName(id){const p=funds().find(x=>x.id===id);return p?p.name:"Fondo";}
 const ICON_IN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17M7 9v8h8"/></svg>';
 const ICON_OUT='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg>';
+const ICON_CARD='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></svg>';
 function personalItemHTML(m){
+  if(m.type==="card_pay") return `<button class="item" type="button" data-personal="${esc(m.id)}"><span class="av mvic card" aria-hidden="true">${ICON_CARD}</span>
+      <span class="t"><b>${esc(m.note||"Pago de tarjeta")}</b><small>Pago de tarjeta · ${esc(fmtDate(m.date))}</small></span>
+      <span class="amt"><b class="neg">− ${money(m.amount,m.cur)}</b></span></button>`;
   if(m.type!=="ingreso"&&m.type!=="gasto"){
     const isPot=m.type.startsWith("pot"), inn=m.type.endsWith("_in"), nm=isPot?potName(m.ref):fundName(m.ref);
     const lbl=isPot?(inn?"Guardaste en":"Sacaste de"):(inn?"Recibiste en":"Usaste de");
@@ -737,8 +780,8 @@ function personalItemHTML(m){
   }
   const conv2=m.cur!==viewCur()?`<small>≈ ${money(conv(m.amount,m.cur,viewCur()),viewCur())}</small>`:"";
   return `<button class="item" type="button" data-personal="${esc(m.id)}">
-    <span class="av mvic ${m.type==="ingreso"?"in":"out"}" aria-hidden="true">${m.type==="ingreso"?ICON_IN:ICON_OUT}</span>
-    <span class="t"><b>${esc(m.note||m.cat)}</b><small>${esc(m.note?m.cat+" · ":"")}${m.type==="ingreso"?"Ingreso":"Gasto"} · ${esc(fmtDate(m.date))}</small></span>
+    <span class="av mvic ${m.type==="ingreso"?"in":m.acct==="credito"?"card":"out"}" aria-hidden="true">${m.type==="ingreso"?ICON_IN:m.acct==="credito"?ICON_CARD:ICON_OUT}</span>
+    <span class="t"><b>${esc(m.note||m.cat)}</b><small>${esc(m.note?m.cat+" · ":"")}${m.type==="ingreso"?"Ingreso":m.acct==="credito"?"Con tarjeta":"Gasto"} · ${esc(fmtDate(m.date))}</small></span>
     <span class="amt"><b class="${m.type==="ingreso"?"pos":"neg"}">${m.type==="ingreso"?"+ ":"− "}${money(m.amount,m.cur)}</b>${conv2}</span></button>`;
 }
 
@@ -905,19 +948,19 @@ function openLimitsSheet(){
 }
 function myCur(){return cfg[me]?cfg[me].cur:"PEN";}
 function balanceInfo(){
-  const c=myCur(); let ing=0,gas=0,aho=0;
-  mine.forEach(m=>{const a=conv(m.amount,m.cur,c); if(m.type==="ingreso") ing+=a; else if(m.type==="gasto") gas+=a; else if(m.type==="pot_in") aho+=a; else if(m.type==="pot_out") aho-=a;});
-  aportes.forEach(a=>{ if(a.owner===uid) aho+=conv(a.amount,a.cur,c); });
+  const c=myCur(); let ing=0,gas=0,aho=0,cred=0,pay=0;
+  mine.forEach(m=>{const a=conv(m.amount,m.cur,c); if(m.type==="ingreso") ing+=a; else if(m.type==="gasto"){gas+=a; if(m.acct==="credito") cred+=a;} else if(m.type==="card_pay") pay+=a; else if(m.type==="pot_in") aho+=a; else if(m.type==="pot_out") aho-=a;});
+  aportes.forEach(a=>{ if(a.owner===uid) aho+=conv(apSigned(a),a.cur,c); });
   const sb=prefs.startBalance&&Number.isFinite(Number(prefs.startBalance.amount))?prefs.startBalance:null;
   const base=sb?conv(Number(sb.amount),["PEN","CAD","USD"].includes(sb.cur)?sb.cur:c,c):0;
-  return {c,ing,gas,aho,base,hasStart:!!sb,avail:base+ing-gas-aho};
+  return {c,ing,gas,aho,base,hasStart:!!sb,cred,pay,debt:cred-pay,avail:base+ing-(gas-cred)-pay-aho};
 }
 function monthHistory(){
   const c=myCur(), by={};
   const add=(ym,k,v)=>{(by[ym]=by[ym]||{ing:0,gas:0,aho:0})[k]+=v;};
   mine.forEach(m=>{const ym=m.date.slice(0,7),a=conv(m.amount,m.cur,c);
     if(m.type==="ingreso") add(ym,"ing",a); else if(m.type==="gasto") add(ym,"gas",a); else if(m.type==="pot_in") add(ym,"aho",a); else if(m.type==="pot_out") add(ym,"aho",-a);});
-  aportes.forEach(a=>{ if(a.owner===uid) add(a.date.slice(0,7),"aho",conv(a.amount,a.cur,c)); });
+  aportes.forEach(a=>{ if(a.owner===uid) add(a.date.slice(0,7),"aho",conv(apSigned(a),a.cur,c)); });
   return Object.keys(by).sort().reverse().map(ym=>({ym,...by[ym]}));
 }
 function balanceHeroHTML(){
@@ -929,8 +972,8 @@ function balanceHeroHTML(){
     ${empty?`<p style="margin:0;font-size:20px;font-weight:500;letter-spacing:-.02em">¿Con cuánto empiezas? Toca «Ajustar» y escribe cuánto tienes hoy.</p>`:`
     <div class="fig num" style="${neg?"color:#B3261E":""}"><span class="nw"><small style="font-size:clamp(16px,7cqi,26px);opacity:1">${neg?"−":""}${sym(b.c)}&nbsp;</small><span data-num="bal" data-val="${Math.trunc(Math.abs(b.avail))}">${intPart}</span><small>.${dec}</small></span></div>
     ${v!==b.c?`<span class="small num" style="opacity:.75">≈ ${money(conv(b.avail,b.c,v),v)}</span>`:""}
-    <div class="balrow num"><span><small>Ingresos</small><b>${moneyShort(b.ing,b.c)}</b></span><span><small>Gastaste</small><b>${moneyShort(b.gas,b.c)}</b></span><span><small>Ahorrado</small><b>${moneyShort(b.aho,b.c)}</b></span></div>
-    <span class="small" style="opacity:.75">Acumulado de todos los meses${b.hasStart?" desde tu saldo inicial":""}. Lo que guardas en tus ahorros o en viajes ya no cuenta para gastar; los fondos van aparte.</span>`}
+    <div class="balrow num"><span><small>Ingresos</small><b>${moneyShort(b.ing,b.c)}</b></span><span><small>Gastaste</small><b>${moneyShort(b.gas-b.cred+b.pay,b.c)}</b></span><span><small>Ahorrado</small><b>${moneyShort(b.aho,b.c)}</b></span></div>
+    <span class="small" style="opacity:.75">Acumulado de todos los meses${b.hasStart?" desde tu saldo inicial":""}. Lo que guardas en tus ahorros o en viajes ya no cuenta para gastar; los fondos van aparte.${b.debt>0.005?` Además debes ${money(b.debt,b.c)} en la tarjeta.`:""}</span>`}
   </section>`;
 }
 function axisNum(v){return new Intl.NumberFormat("es-PE",{notation:"compact",maximumFractionDigits:1}).format(v);}
@@ -986,6 +1029,56 @@ function funds(){return boxList("funds");}
 function boxBalance(kind,b){
   const pin=kind==="pot"?"pot_in":"fund_in", pout=kind==="pot"?"pot_out":"fund_out";
   return mine.filter(m=>m.ref===b.id&&(m.type===pin||m.type===pout)).reduce((s,m)=>s+(m.type===pin?1:-1)*conv(m.amount,m.cur,b.cur),0);
+}
+function cardLimit(){const l=prefs.cardLimit||{};const amt=Math.max(0,Number(l.amount)||0);return {amount:amt,cur:["PEN","CAD","USD"].includes(l.cur)?l.cur:myCur()};}
+function creditCardHTML(){
+  const b=balanceInfo(), c=b.c, debt=Math.max(0,b.debt), over=b.debt<-0.005, lim=cardLimit(), limC=lim.amount>0?conv(lim.amount,lim.cur,c):0;
+  const used=mine.some(m=>(m.type==="gasto"&&m.acct==="credito")||m.type==="card_pay");
+  const pc=limC>0?Math.min(100,debt/limC*100):0;
+  return `<section class="card"><div class="row"><h2>Tarjeta de crédito</h2><span class="lockpill">${ICON_LOCK} Solo tú</span></div>
+    ${used||lim.amount>0?`<div class="cardhero"><small>${over?"Pagaste de más (saldo a favor)":"Debes en la tarjeta"}</small><b>${money(over?-b.debt:debt,c)}</b>
+      ${limC>0?`<span class="track" style="height:8px;border-radius:999px;background:var(--chip);overflow:hidden"><i style="display:block;height:100%;width:${pc}%;background:${pc>=90?"var(--bad)":"var(--lila)"};border-radius:999px"></i></span><small class="num">${Math.round(pc)}% de tu línea de ${moneyShort(limC,c)} · te quedan ${moneyShort(Math.max(0,limC-debt),c)}</small>`:""}</div>
+      <p class="small muted" style="margin:0">Lo que pagas con tarjeta cuenta como gasto del mes, pero no baja «Tienes para gastar» hasta que pagas la tarjeta.</p>
+      <div class="grid2"><button class="btn limebtn" type="button" id="cardPay"${debt<=0.005?" disabled":""}>Pagar tarjeta</button><button class="btn ghost" type="button" id="cardLimit">${lim.amount>0?"Cambiar línea":"Poner línea"}</button></div>`
+    :`<p class="small muted" style="margin:0">Al registrar un gasto, elige «Tarjeta de crédito» y se separa de tu cuenta de débito: verás cuánto debes y, cuando pagues, se descuenta de tu saldo.</p>
+      <button class="btn ghost block" type="button" id="cardLimit">Poner línea de crédito (opcional)</button>`}
+  </section>`;
+}
+function openCardPaySheet(m){
+  if(!db||!uid||!me){toast("Inicia sesión para continuar.");return;}
+  const b=balanceInfo(), debt=Math.max(0,b.debt+(m?conv(m.amount,m.cur,b.c):0)), sh=document.getElementById("sheet");
+  sh.innerHTML=`<div class="row"><h2>${m?"Editar pago":"Pagar tarjeta"}</h2><button class="link" type="button" id="cp-close">Cerrar</button></div>
+    <p class="small muted" style="margin:0">Debes ${money(debt,b.c)}. El pago sale de «Tienes para gastar» y baja la deuda. No cuenta como gasto nuevo (ya lo contaste al comprar).</p>
+    <div class="field"><span class="lab">Monto</span><div class="amount-row"><input id="cp-amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${m?m.amount:(debt>0?Math.round(debt*100)/100:"")}" aria-label="Monto"><select id="cp-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${(m?m.cur:b.c)===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
+    <div class="grid2"><div class="field"><label for="cp-note">Nota (opcional)</label><input id="cp-note" maxlength="120" value="${esc(m?m.note:"")}" placeholder="Ej. Pago de noviembre"></div><div class="field"><label for="cp-date">Fecha</label><input id="cp-date" type="date" value="${esc(m?m.date:todayStr())}"></div></div>
+    <p class="err" id="cp-err"></p>
+    <button class="btn block" type="button" id="cp-save">${m?"Guardar cambios":"Registrar pago"}</button>
+    ${m?`<button class="btn danger block" type="button" id="cp-del">Eliminar</button>`:""}`;
+  document.getElementById("cp-close").onclick=closeSheet;
+  document.getElementById("cp-save").onclick=async()=>{
+    const amt=Number(document.getElementById("cp-amt").value), cur=document.getElementById("cp-cur").value, date=document.getElementById("cp-date").value, err=document.getElementById("cp-err");
+    if(!(amt>0)){err.textContent="Escribe un monto mayor que 0.";return;}
+    if(!isDate(date)){err.textContent="Elige una fecha.";return;}
+    if(conv(amt,cur,b.c)>debt+0.005){err.textContent=debt>0.005?`Solo debes ${money(debt,b.c)}.`:"No tienes deuda en la tarjeta.";return;}
+    const data={type:"card_pay",amount:Math.round(amt*100)/100,cur,note:document.getElementById("cp-note").value.trim(),date,cat:"",ref:"",created:m?m.created:Date.now()};
+    try{ m?await myPriv().doc(m.id).set(data):await myPriv().add(data); closeSheet(); toast(m?"Cambios guardados":"Pago registrado"); }catch(x){err.textContent=errMsg(x);}
+  };
+  const del=document.getElementById("cp-del");
+  if(del) del.onclick=async()=>{ if(del.dataset.confirm!=="1"){del.dataset.confirm="1";del.textContent="Toca otra vez para eliminar";return;}
+    try{await myPriv().doc(m.id).delete();closeSheet();toast("Eliminado");}catch(x){document.getElementById("cp-err").textContent=errMsg(x);} };
+  openScrim();
+}
+function openCardLimitSheet(){
+  const l=cardLimit(), sh=document.getElementById("sheet");
+  sh.innerHTML=`<div class="row"><h2>Línea de crédito</h2><button class="link" type="button" id="cl-close">Cerrar</button></div>
+    <p class="small muted" style="margin:0">Opcional. Sirve para ver cuánto te queda disponible en la tarjeta. Déjalo en blanco para quitarla.</p>
+    <div class="field"><span class="lab">Monto</span><div class="amount-row"><input id="cl-amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${l.amount||""}" aria-label="Línea de crédito"><select id="cl-cur" aria-label="Moneda">${["PEN","CAD","USD"].map(k=>`<option value="${k}"${l.cur===k?" selected":""}>${sym(k)} ${k}</option>`).join("")}</select></div></div>
+    <p class="err" id="cl-err"></p><button class="btn block" type="button" id="cl-save">Guardar</button>`;
+  document.getElementById("cl-close").onclick=closeSheet;
+  document.getElementById("cl-save").onclick=async()=>{const raw=document.getElementById("cl-amt").value, n=raw===""?0:Number(raw);
+    if(!(n>=0)){document.getElementById("cl-err").textContent="Escribe un monto válido.";return;}
+    const cur=document.getElementById("cl-cur").value; closeSheet(); await savePrefs({cardLimit:{amount:Math.round(n*100)/100,cur}}); toast(n>0?"Línea guardada":"Línea quitada"); };
+  openScrim();
 }
 function potsCardHTML(){
   const ps=pots();
@@ -1095,6 +1188,7 @@ function renderDinero(){
   <div class="wrap" style="padding:0">
     <h1 class="pagetitle">Mis finanzas</h1><span class="lockpill">${ICON_LOCK} Solo tú lo ves · ${esc(pname(me==="p1"?"p2":"p1"))} solo ve tus ahorros para viajes</span>
     ${balanceHeroHTML()}
+    ${creditCardHTML()}
     <h2 id="monthDetail" class="sectitle">Este mes</h2>
     <div class="monthnav"><button type="button" id="mPrev" aria-label="Mes anterior">‹</button><h2>${esc(label)}</h2><button type="button" id="mNext" aria-label="Mes siguiente">›</button></div>
     <div class="card">
@@ -1127,6 +1221,8 @@ function renderDinero(){
   el.querySelectorAll("[data-mpick]").forEach(b=>b.onclick=()=>{month=b.dataset.mpick;renderDinero();});
   el.querySelectorAll("[data-month]").forEach(b=>b.onclick=()=>{month=b.dataset.month;renderDinero();const d=document.getElementById("monthDetail");if(d)d.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});});
   const eb=document.getElementById("editBudget"); if(eb) eb.onclick=openBudgetSheet;
+  const cp=document.getElementById("cardPay"); if(cp) cp.onclick=()=>openCardPaySheet(null);
+  const cl=document.getElementById("cardLimit"); if(cl) cl.onclick=openCardLimitSheet;
   document.getElementById("mPrev").onclick=()=>shiftMonth(-1);
   document.getElementById("mNext").onclick=()=>shiftMonth(1);
 }
@@ -1135,12 +1231,49 @@ function shiftMonth(d){const [y,m]=month.split("-").map(Number),dt=new Date(y,m-
 /* ---------- Viajes (compartido) ---------- */
 function contribHTML(v,st){
   const tot=st.by.p1+st.by.p2;
-  const orig=k=>{const u=uidOf(k), byCur={};aportes.filter(a=>a.viaje===v.id&&a.who===k).forEach(a=>{byCur[a.cur]=(byCur[a.cur]||0)+a.amount;});return Object.keys(byCur).map(c=>money(byCur[c],c)).join(" + ");};
+  const orig=k=>{const u=uidOf(k), byCur={};aportes.filter(a=>a.viaje===v.id&&a.who===k).forEach(a=>{byCur[a.cur]=(byCur[a.cur]||0)+apSigned(a);});return Object.keys(byCur).map(c=>money(byCur[c],c)).join(" + ");};
   return `<div class="contrib">${["p1","p2"].map(k=>{const pc=tot>0?st.by[k]/tot*100:0, o=orig(k);
     return `<div class="crow"><span class="cn"><i class="dot ${k}"></i>${esc(pname(k))}</span><span class="cv num"><b>${money(st.by[k],v.cur)}</b>${o&&o!==money(st.by[k],v.cur)?`<small>puso ${esc(o)}</small>`:""}</span><span class="cp num">${Math.round(pc)}%</span></div>`;}).join("")}
     <small class="muted">% de lo ahorrado hasta ahora. Todo convertido a ${sym(v.cur)}, la moneda del viaje.</small></div>`;
 }
-function openTripSheet(id){
+function tripBudgetHTML(v,st){
+  const b=v.budget||[]; if(!b.length) return "";
+  const tot=v.target||0, s=budgetSummary(v), avail=st.saved-s.paid;
+  return `<div class="field"><div class="row"><span class="lab">Presupuesto</span><span class="small muted">${s.n} de ${b.length} comprado${b.length===1?"":"s"}</span></div>
+    <div class="blist">${b.map((x,i)=>{const c=budgetCost(x), pc=tot>0?c/tot*100:0;
+      return `<button type="button" class="bitem${x.bought?" on":""}" data-bitem="${i}" aria-pressed="${x.bought}" aria-label="${esc(x.name)}: ${x.bought?"comprado":"por comprar"}">
+        <span class="ck" aria-hidden="true">${x.bought?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>':""}</span>
+        <span class="bt"><b>${esc(x.name)}</b><span class="bar"><i style="width:${pc}%"></i></span><small>${Math.round(pc)}% del viaje${x.bought?" · comprado":""}</small></span>
+        <span class="ba">${moneyShort(c,v.cur)}${x.bought&&x.paid!=null&&Math.abs(x.paid-x.amount)>0.005?`<small>calculado ${moneyShort(x.amount,v.cur)}</small>`:""}</span></button>
+        <div class="bpay" id="bpay-${i}" hidden></div>`;}).join("")}</div></div>
+    <div class="grid2">
+      <div class="tile-s"><span class="k">Ya compraron</span><span class="v">${moneyShort(s.paid,v.cur)}</span></div>
+      <div class="tile-s"><span class="k">Falta comprar</span><span class="v">${moneyShort(s.pend,v.cur)}</span></div>
+      <div class="tile-s"><span class="k">Ahorrado</span><span class="v">${moneyShort(st.saved,v.cur)}</span></div>
+      <div class="tile-s"><span class="k">Dinero que queda</span><span class="v" style="${avail<-0.005?"color:var(--bad)":""}">${avail<0?"− ":""}${moneyShort(Math.abs(avail),v.cur)}</span></div></div>
+    ${avail<-0.005?`<p class="small muted" style="margin:0">Compraron más de lo ahorrado: faltan ${money(-avail,v.cur)} por cubrir.</p>`:""}`;
+}
+function bindTripBudget(v){
+  document.querySelectorAll("[data-bitem]").forEach(btn=>btn.onclick=()=>{
+    const i=+btn.dataset.bitem, x=v.budget[i], box=document.getElementById("bpay-"+i);
+    document.querySelectorAll(".bpay").forEach(o=>{if(o!==box){o.hidden=true;o.innerHTML="";}});
+    if(!box.hidden){box.hidden=true;box.innerHTML="";return;}
+    box.hidden=false;
+    box.innerHTML=x.bought?`<span class="small muted">¿Lo desmarcas? Volverá a «Falta comprar».</span><button class="btn ghost sm" type="button" id="bp-undo">Desmarcar</button>`
+      :`<div class="field" style="gap:4px"><label for="bp-amt" class="small">¿Cuánto pagaron? (${sym(v.cur)})</label><input id="bp-amt" type="number" inputmode="decimal" min="0" step="0.01" value="${x.amount||""}" placeholder="0.00"></div><button class="btn limebtn sm" type="button" id="bp-ok">Comprado</button>`;
+    const save=async nb=>{const data={name:v.name,target:Math.round(nb.reduce((s,b)=>s+budgetCost(b),0)*100)/100,budget:nb,cur:v.cur,date:v.date,place:v.place,created:v.created||Date.now()};
+      try{await db.doc("viajes/"+v.id).set(data);}catch(e){toast(errMsg(e));return false;} return true;};
+    const ok=document.getElementById("bp-ok"), undo=document.getElementById("bp-undo");
+    if(ok) ok.onclick=async()=>{const raw=document.getElementById("bp-amt").value, n=raw===""?x.amount:Number(raw);
+      if(!(n>=0)){toast("Escribe cuánto pagaron.");return;}
+      const nb=v.budget.map((b,j)=>j===i?{...b,bought:true,paid:Math.round(n*100)/100}:b);
+      if(await save(nb)){toast(x.name+" comprado");openTripSheet(v.id,true);}};
+    if(undo) undo.onclick=async()=>{const nb=v.budget.map((b,j)=>j===i?{...b,bought:false,paid:null}:b);
+      if(await save(nb)){toast(x.name+" desmarcado");openTripSheet(v.id,true);}};
+    const f=document.getElementById("bp-amt"); if(f) f.focus();
+  });
+}
+function openTripSheet(id,keepOpen){
   const v=viajeById(id); if(!v) return;
   const st=viajeStats(v), dl=v.date?fmtDate(v.date,{day:"numeric",month:"long",year:"numeric"}):"Sin fecha";
   const past=st.days!==null&&st.days<0;
@@ -1150,15 +1283,17 @@ function openTripSheet(id){
         <div class="row num"><span style="font-family:var(--display);font-size:26px;font-weight:700">${money(st.saved,v.cur)}</span><span class="muted">${v.target>0?Math.round(st.pct*100)+"%":"sin meta"}</span></div>
         ${v.target>0?barHTML(v,st):""}
         ${contribHTML(v,st)}
+        ${tripBudgetHTML(v,st)}
         ${v.target>0?`<div class="grid2">
-          <div class="tile-s"><span class="k">Meta</span><span class="v">${moneyShort(v.target,v.cur)}</span></div>
-          <div class="tile-s"><span class="k">Falta</span><span class="v">${moneyShort(st.remaining,v.cur)}</span></div></div>
+          <div class="tile-s"><span class="k">Meta (total)</span><span class="v">${moneyShort(v.target,v.cur)}</span></div>
+          <div class="tile-s"><span class="k">Falta ahorrar</span><span class="v">${moneyShort(st.remaining,v.cur)}</span></div></div>
           ${st.perWeek!==null&&st.remaining>0?`<p class="small muted" style="margin:0">Para llegar a tiempo: <b style="color:var(--ink)" class="num">${money(st.perWeek,v.cur)}</b> por semana entre las dos, unos ${money(conv(st.perWeek/2,v.cur,cfg.p1.cur),cfg.p1.cur)} ${esc(pname("p1"))} y ${money(conv(st.perWeek/2,v.cur,cfg.p2.cur),cfg.p2.cur)} ${esc(pname("p2"))}.</p>`:""}
           ${st.remaining===0?`<p class="small" style="margin:0;color:var(--good)">¡Meta cumplida!</p>`:""}`:`<p class="small muted" style="margin:0">Pónganle un monto meta para ver cuánto ahorrar por semana.</p>`}
-        ${me?`<button class="btn limebtn" type="button" data-aportar="${esc(v.id)}">+ Ahorrar para este viaje</button>`:""}
+        ${me?`<div class="grid2"><button class="btn limebtn" type="button" data-aportar="${esc(v.id)}">+ Ahorrar</button><button class="btn ghost" type="button" data-sacar="${esc(v.id)}">Sacar dinero</button></div>`:""}
 `;
   document.getElementById("tr-close").onclick=closeSheet;
-  openScrim();
+  bindTripBudget(v);
+  if(!keepOpen) openScrim();
 }
 function renderViajes(){
   const vs=sortedViajes();
@@ -1175,6 +1310,7 @@ function renderViajes(){
         <div class="row"><div style="min-width:0"><h2>${esc(v.name)}</h2><span class="small muted">${esc(when)}${left?" · "+left:""}</span></div><span aria-hidden="true" class="setcard-go">›</span></div>
         <div class="row num"><b class="tripamt">${money(st.saved,v.cur)}</b><span class="muted small">${v.target>0?Math.round(st.pct*100)+"% de "+moneyShort(v.target,v.cur):"sin meta"}</span></div>
         ${v.target>0?barHTML(v,st):""}
+        ${(v.budget||[]).length?(()=>{const s=budgetSummary(v);return `<span class="small muted num">${s.n?`Compraron ${s.n} de ${v.budget.length} · faltan comprar ${moneyShort(s.pend,v.cur)}`:`Presupuesto: ${v.budget.filter(b=>b.amount>0).map(b=>esc(b.name)).join(", ")||"sin montos aún"}`}</span>`;})():""}
         <div class="row small"><span class="tripwho num"><i class="dot p1"></i>${esc(pname("p1"))} ${moneyShort(st.by.p1,v.cur)} <i class="dot p2"></i>${esc(pname("p2"))} ${moneyShort(st.by.p2,v.cur)}</span>${me&&!past?`<button class="btn limebtn sm" type="button" data-aportar="${esc(v.id)}">+ Ahorrar</button>`:""}</div>
       </div>`;}).join(""):`<div class="card"><p class="muted" style="margin:0">Todavía no hay viajes. Creen uno con su fecha y cuánto necesitan (pasajes, estadía, gastos) y empiecen a ahorrar juntas.</p>`}
     ${orphan.length?`<div class="card"><h2>Ahorros sin viaje</h2><p class="small muted" style="margin:0">Toca uno tuyo para asignarle un viaje y que se sume.</p><div class="list">${orphan.sort(sortByDate).map(a=>aporteItemHTML(a)).join("")}</div></div>`:""}
@@ -1286,9 +1422,9 @@ function renderAjustes(){
 async function exportCsv(){
   const q=s=>`"${String(s==null?"":s).replace(/"/g,'""')}"`;
   const rows=[["Fecha","Tipo","Categoría o viaje","Nota","Monto","Moneda",`Monto en ${viewCur()}`]];
-  const TL={ingreso:"Ingreso",gasto:"Gasto",pot_in:"Guardado en ahorro",pot_out:"Sacado de ahorro",fund_in:"Recibido en fondo",fund_out:"Usado de fondo"};
-  mine.forEach(m=>rows.push([m.date,TL[m.type],m.type.startsWith("pot")?potName(m.ref):m.type.startsWith("fund")?fundName(m.ref):m.cat,m.note,m.amount.toFixed(2),m.cur,conv(m.amount,m.cur,viewCur()).toFixed(2)]));
-  aportes.filter(a=>a.owner===uid).forEach(a=>{const v=viajeById(a.viaje);rows.push([a.date,"Ahorro para viaje",v?v.name:"Sin viaje",a.note,a.amount.toFixed(2),a.cur,conv(a.amount,a.cur,viewCur()).toFixed(2)]);});
+  const TL={ingreso:"Ingreso",gasto:"Gasto",pot_in:"Guardado en ahorro",pot_out:"Sacado de ahorro",fund_in:"Recibido en fondo",fund_out:"Usado de fondo",card_pay:"Pago de tarjeta"};
+  mine.forEach(m=>rows.push([m.date,TL[m.type]+(m.type==="gasto"&&m.acct==="credito"?" (tarjeta)":""),m.type.startsWith("pot")?potName(m.ref):m.type.startsWith("fund")?fundName(m.ref):m.cat,m.note,m.amount.toFixed(2),m.cur,conv(m.amount,m.cur,viewCur()).toFixed(2)]));
+  aportes.filter(a=>a.owner===uid).forEach(a=>{const v=viajeById(a.viaje);rows.push([a.date,a.out?"Sacado de viaje":"Ahorro para viaje",v?v.name:"Sin viaje",a.note,apSigned(a).toFixed(2),a.cur,conv(apSigned(a),a.cur,viewCur()).toFixed(2)]);});
   rows.splice(1,rows.length-1,...rows.slice(1).sort((x,y)=>x[0]<y[0]?1:-1));
   const csv="﻿"+rows.map(r=>r.map(q).join(",")).join("\r\n");
   let dl=null; try{dl=await window.claude.use("downloads");}catch(e){}
@@ -1833,10 +1969,10 @@ function renderPerfil(){
   if(!me){el.innerHTML=`<div class="wrap" style="padding:0"><div class="card"><h2>Tu perfil</h2><p class="muted" style="margin:0">Inicia sesión para ver tu perfil.</p></div></div>`;return;}
   const other=me==="p1"?"p2":"p1", my=cfg[me], c=my.cur;
   const mine_ap=aportes.filter(a=>a.owner===uid);
-  const total=mine_ap.reduce((s,a)=>s+conv(a.amount,a.cur,c),0);
+  const total=mine_ap.reduce((s,a)=>s+conv(apSigned(a),a.cur,c),0);
   const tm=myMonthTotals(todayStr().slice(0,7));
   const active=viajes.filter(v=>{const d=daysUntil(v.date);return d===null||d>=0;}).length;
-  const byTrip=sortedViajes().map(v=>{const st=viajeStats(v);const mineV=mine_ap.filter(a=>a.viaje===v.id).reduce((s,a)=>s+conv(a.amount,a.cur,v.cur),0);return {v,st,mineV};}).filter(x=>x.st.saved>0||x.v.target>0);
+  const byTrip=sortedViajes().map(v=>{const st=viajeStats(v);const mineV=mine_ap.filter(a=>a.viaje===v.id).reduce((s,a)=>s+conv(apSigned(a),a.cur,v.cur),0);return {v,st,mineV};}).filter(x=>x.st.saved>0||x.v.target>0);
   const theme=getTheme(); if(!homeIcon){try{homeIcon=localStorage.getItem("closeby-icon");}catch(e){} if(!ICON_SETS.some(x=>x[0]===homeIcon)) homeIcon=getPalette();}
   let otherTime="--:--";try{otherTime=new Date().toLocaleTimeString("es-PE",{timeZone:cfg[other].tz,hour:"2-digit",minute:"2-digit",hour12:false});}catch(e){}
   el.innerHTML=`
@@ -2040,7 +2176,9 @@ function sheetY(sh){const m=getComputedStyle(sh).transform;if(!m||m==="none")ret
 })();
 function openSheet(item,preset){
   if(!db||!uid||!me){toast("Inicia sesión para registrar.");return;}
-  S=item?{...item,editing:true}:{type:"gasto",amount:"",cur:cfg[me].cur,cat:"Comida",note:"",date:todayStr(),viaje:"",fdir:"in",fund:"",...(preset||{})};
+  let lastAcct="debito"; try{lastAcct=localStorage.getItem("closeby-acct")==="credito"?"credito":"debito";}catch(e){}
+  S=item?{...item,editing:true}:{type:"gasto",amount:"",cur:cfg[me].cur,cat:"Comida",note:"",date:todayStr(),viaje:"",fdir:"in",fund:"",acct:lastAcct,adir:"in",...(preset||{})};
+  if(S.type==="aporte") S.adir=S.out?"out":(S.adir||"in");
   if(S.type==="aporte") S.dest=S.dest||(S.viaje?"v:"+S.viaje:"");
   if(S.type==="aporte"&&!S.dest){const nv=nextViaje()||sortedViajes()[0];if(nv)S.dest="v:"+nv.id;else if(pots()[0])S.dest="p:"+pots()[0].id;}
   if(S.type==="fondo"&&!S.fund&&funds()[0]) S.fund=funds()[0].id;
@@ -2055,11 +2193,15 @@ function drawSheet(){
   sh.innerHTML=`
     <div class="row"><h2>${s.editing?"Editar":"Registrar"}</h2><button class="link" type="button" id="f-close">Cerrar</button></div>
     ${s.editing?"":`<div class="seg" id="f-type">${seg("gasto","Gasto")}${seg("ingreso","Ingreso")}${seg("aporte","Ahorro")}${seg("fondo","Fondo")}</div>`}
-    <p class="small muted" style="margin:0">${s.type==="aporte"?(s.dest&&s.dest.startsWith("v:")?`Ahorro para un viaje: lo verán las dos.`:`${LOCK} Va a tus ahorros: solo tú lo ves y sale de «Tienes para gastar».`)
+    ${s.type==="gasto"?`<div class="seg" id="f-acct"><button type="button" data-acct="debito" aria-pressed="${s.acct!=="credito"}">Débito o efectivo</button><button type="button" data-acct="credito" aria-pressed="${s.acct==="credito"}">Tarjeta de crédito</button></div>`:""}
+    ${s.type==="aporte"&&!(s.editing&&s.dest&&s.dest.startsWith("p:"))?`<div class="seg" id="f-adir"><button type="button" data-adir="in" aria-pressed="${s.adir!=="out"}">Poner dinero</button><button type="button" data-adir="out" aria-pressed="${s.adir==="out"}">Sacar dinero</button></div>`:""}
+    <p class="small muted" style="margin:0">${s.type==="aporte"&&s.adir==="out"?`Vuelve a «Tienes para gastar». No se borra nada: queda registrado que lo sacaste${s.dest&&s.dest.startsWith("v:")?" y lo verán las dos":""}.`
+      :s.type==="gasto"&&s.acct==="credito"?`${LOCK} Cuenta como gasto del mes, pero no baja «Tienes para gastar» hasta que pagues la tarjeta.`
+      :s.type==="aporte"?(s.dest&&s.dest.startsWith("v:")?`Ahorro para un viaje: lo verán las dos.`:`${LOCK} Va a tus ahorros: solo tú lo ves y sale de «Tienes para gastar».`)
       :s.type==="fondo"?`${LOCK} Dinero que no es tuyo para gastar. No suma ni resta a tu saldo.`:`${LOCK} Privado: solo tú verás este ${s.type}.`}</p>
-    ${s.type==="aporte"&&!s.editing?`<div class="field"><span class="lab">¿A dónde va este ahorro?</span>
+    ${s.type==="aporte"&&!s.editing?`<div class="field"><span class="lab">${s.adir==="out"?"¿De dónde lo sacas?":"¿A dónde va este ahorro?"}</span>
       ${vs.length?`<span class="small muted">Viajes (compartido)</span><div class="chips" id="f-dest">${vs.map(v=>`<button type="button" data-dest="v:${esc(v.id)}" aria-pressed="${s.dest==="v:"+v.id}">${ICON_PLANE} ${esc(v.name)}</button>`).join("")}</div>`:""}
-      <span class="small muted">Mis ahorros (solo tú)</span><div class="chips" id="f-dest2">${pots().map(p=>`<button type="button" data-dest="p:${esc(p.id)}" aria-pressed="${s.dest==="p:"+p.id}">${esc(p.name)}</button>`).join("")}<button type="button" class="addchip" id="f-newpot">+ Nuevo ahorro</button></div></div>`
+      <span class="small muted">Mis ahorros (solo tú)</span><div class="chips" id="f-dest2">${pots().map(p=>`<button type="button" data-dest="p:${esc(p.id)}" aria-pressed="${s.dest==="p:"+p.id}">${esc(p.name)}</button>`).join("")}${s.adir==="out"?"":`<button type="button" class="addchip" id="f-newpot">+ Nuevo ahorro</button>`}</div></div>`
     :s.type==="aporte"?`<div class="field"><span class="lab">Viaje</span><div class="chips" id="f-dest">${vs.map(v=>`<button type="button" data-dest="v:${esc(v.id)}" aria-pressed="${s.dest==="v:"+v.id}">${esc(v.name)}</button>`).join("")}</div></div>`:""}
     ${s.type==="fondo"?`<div class="seg" id="f-fdir"><button type="button" data-d="in" aria-pressed="${s.fdir==="in"}">Recibí dinero</button><button type="button" data-d="out" aria-pressed="${s.fdir==="out"}">Usé dinero</button></div>
       <div class="field"><span class="lab">¿Qué fondo?</span><div class="chips" id="f-fund">${funds().map(f=>`<button type="button" data-fund="${esc(f.id)}" aria-pressed="${s.fund===f.id}">${esc(f.name)}</button>`).join("")}<button type="button" class="addchip" id="f-newfund">+ Nuevo fondo</button></div></div>`:""}
@@ -2082,6 +2224,8 @@ function drawSheet(){
     if(s.type==="aporte"&&!s.dest){const nv=nextViaje()||sortedViajes()[0];if(nv)s.dest="v:"+nv.id;else if(pots()[0])s.dest="p:"+pots()[0].id;}
     if(s.type==="fondo"&&!s.fund&&funds()[0]) s.fund=funds()[0].id; drawSheet();});
   sh.querySelectorAll("[data-dest]").forEach(b=>b.onclick=()=>{keep();s.dest=b.dataset.dest;drawSheet();});
+  sh.querySelectorAll("#f-acct button").forEach(b=>b.onclick=()=>{keep();s.acct=b.dataset.acct;try{localStorage.setItem("closeby-acct",s.acct);}catch(e){}drawSheet();});
+  sh.querySelectorAll("#f-adir button").forEach(b=>b.onclick=()=>{keep();s.adir=b.dataset.adir;drawSheet();});
   sh.querySelectorAll("#f-fdir button").forEach(b=>b.onclick=()=>{keep();s.fdir=b.dataset.d;drawSheet();});
   sh.querySelectorAll("#f-fund [data-fund]").forEach(b=>b.onclick=()=>{keep();s.fund=b.dataset.fund;drawSheet();});
   const fnp=document.getElementById("f-newpot"); if(fnp) fnp.onclick=()=>openBoxSheet("pot",null);
@@ -2095,16 +2239,23 @@ function drawSheet(){
     if(!isDate(s.date)){err.textContent="Elige una fecha.";return;}
     if(s.type==="aporte"){ if(!s.dest){err.textContent="Elige a dónde va este ahorro.";return;}
       if(s.dest.startsWith("v:")){s.viaje=s.dest.slice(2);if(!viajeById(s.viaje)){err.textContent="Ese viaje ya no existe.";return;}}
-      else if(!pots().some(p=>"p:"+p.id===s.dest)){err.textContent="Ese ahorro ya no existe.";return;} }
+      else if(!pots().some(p=>"p:"+p.id===s.dest)){err.textContent="Ese ahorro ya no existe.";return;}
+      if(s.adir==="out"){
+        if(s.dest.startsWith("v:")){const v=viajeById(s.viaje), max=Math.max(0,aportes.filter(a=>a.viaje===v.id&&a.owner===uid&&a.id!==s.id).reduce((t,a)=>t+conv(apSigned(a),a.cur,v.cur),0));
+          if(conv(amt,s.cur,v.cur)>max+0.005){err.textContent=max>0.005?`Solo tienes ${money(max,v.cur)} ahorrado en ${v.name}.`:`Todavía no tienes ahorro en ${v.name}.`;return;}}
+        else {const pt=pots().find(p=>"p:"+p.id===s.dest), bal=boxBalance("pot",pt);
+          if(conv(amt,s.cur,pt.cur)>bal+0.005){err.textContent=`Solo hay ${money(bal,pt.cur)} en ${pt.name}.`;return;}}
+      } }
     if(s.type==="fondo"){ const f=funds().find(x=>x.id===s.fund); if(!f){err.textContent=funds().length?"Elige el fondo.":"Primero crea un fondo.";return;}
       if(s.fdir==="out"&&conv(amt,s.cur,f.cur)>boxBalance("fund",f)+0.005){err.textContent=`Solo quedan ${money(boxBalance("fund",f),f.cur)} en ${f.name}.`;return;} }
     const base={amount:Math.round(amt*100)/100,cur:s.cur,note:s.note.trim(),date:s.date,created:s.created||Date.now()};
     const btn=document.getElementById("f-save"); btn.disabled=true;
     try{
-      if(s.type==="aporte"&&s.dest&&s.dest.startsWith("p:")){ await myPriv().add({...base,type:"pot_in",ref:s.dest.slice(2),cat:""}); closeSheet(); toast("Guardado en "+potName(s.dest.slice(2))); return; }
+      if(s.type==="aporte"&&s.dest&&s.dest.startsWith("p:")){ const out=s.adir==="out"; await myPriv().add({...base,type:out?"pot_out":"pot_in",ref:s.dest.slice(2),cat:""}); closeSheet(); toast(out?"Listo, sacaste de "+potName(s.dest.slice(2)):"Guardado en "+potName(s.dest.slice(2))); return; }
       if(s.type==="fondo"){ await myPriv().add({...base,type:"fund_"+s.fdir,ref:s.fund,cat:""}); closeSheet(); toast(s.fdir==="in"?"Registrado en el fondo":"Uso del fondo registrado"); return; }
-      if(s.type==="aporte"){ const data={...base,type:"aporte",viaje:s.viaje}; s.id?await myAportes().doc(s.id).set(data):await myAportes().add(data); }
-      else { const data={...base,type:s.type,cat:s.cat}; s.id?await myPriv().doc(s.id).set(data):await myPriv().add(data);
+      if(s.type==="aporte"){ const data={...base,type:"aporte",viaje:s.viaje,out:s.adir==="out"}; s.id?await myAportes().doc(s.id).set(data):await myAportes().add(data);
+        if(data.out){closeSheet();toast("Listo, sacaste "+money(base.amount,base.cur)+" del viaje");return;} }
+      else { const data={...base,type:s.type,cat:s.cat}; if(s.type==="gasto") data.acct=s.acct==="credito"?"credito":"debito"; s.id?await myPriv().doc(s.id).set(data):await myPriv().add(data);
         if(s.type==="gasto"){const l=catLimits()[s.cat];if(l){const lc=limitsCur(),ym=s.date.slice(0,7);
           const tot=mine.filter(m=>m.type==="gasto"&&m.cat===s.cat&&m.date.slice(0,7)===ym&&m.id!==s.id).reduce((t,m)=>t+conv(m.amount,m.cur,lc),0)+conv(base.amount,s.cur,lc);
           if(tot>=l){closeSheet();toast(`Te pasaste del límite de ${s.cat}`);return;} if(tot>=l*.8){closeSheet();toast(`Cuidado: llevas ${Math.round(tot/l*100)}% del límite de ${s.cat}`);return;}}} }
@@ -2130,26 +2281,56 @@ function showReadOnly(a){
 /* ---------- Hoja: viaje ---------- */
 function openViajeSheet(v){
   if(!db||!me){toast("Inicia sesión para crear viajes.");return;}
-  const x=v||{name:"",target:"",cur:"PEN",date:"",place:""}, sh=document.getElementById("sheet");
+  const x=v||{name:"",target:"",cur:"PEN",date:"",place:"",budget:[]}, sh=document.getElementById("sheet");
+  let B=(x.budget||[]).map(b=>({...b}));
+  if(!B.length&&x.target>0) B.push({id:"otros",name:"Otros",amount:x.target,bought:false,paid:null});
+  BUD_REQ.forEach((n,i)=>{ if(!B.some(b=>b.name.toLowerCase()===n.toLowerCase())) B.splice(i,0,{id:BUD_IDS[i],name:n,amount:0,bought:false,paid:null}); });
   sh.innerHTML=`
     <div class="row"><h2>${v?"Editar viaje":"Nuevo viaje"}</h2><button class="link" type="button" id="v-close">Cerrar</button></div>
     <div class="field"><label for="v-name">Nombre</label><input id="v-name" maxlength="40" placeholder="Ej. Navidad en Lima" value="${esc(x.name)}"></div>
     <div class="grid2">
       <div class="field"><label for="v-date">Fecha del encuentro</label><input id="v-date" type="date" value="${esc(x.date)}"></div>
       <div class="field"><label for="v-place">Dónde</label><input id="v-place" maxlength="40" placeholder="Ej. Montreal" value="${esc(x.place)}"></div>
-      <div class="field"><label for="v-target">Meta de ahorro</label><input id="v-target" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${x.target||""}"></div>
-      <div class="field"><label for="v-cur">Moneda de la meta</label>${curSelect("v-cur",x.cur)}</div>
+      <div class="field" style="grid-column:1/-1"><label for="v-cur">Moneda del presupuesto</label>${curSelect("v-cur",x.cur)}</div>
+    </div>
+    <div class="field"><span class="lab">Presupuesto</span>
+      <span class="small muted">Vuelos, hotel y comida van siempre. Lo demás es opcional. La meta de ahorro es la suma de todo.</span>
+      <div class="bud" id="v-bud"></div>
+      <div class="chips" id="v-addb"></div>
+      <div class="budtotal"><span>Total del viaje</span><b id="v-total">0</b></div>
     </div>
     <p class="err" id="v-err"></p>
     <button class="btn block" type="button" id="v-save">${v?"Guardar cambios":"Crear viaje"}</button>
     ${v?`<button class="btn danger block" type="button" id="v-del">Eliminar viaje</button>`:""}`;
+  const isReq=b=>BUD_REQ.some(n=>n.toLowerCase()===b.name.toLowerCase());
+  const readB=()=>{document.querySelectorAll("#v-bud [data-bi]").forEach(inp=>{const b=B[+inp.dataset.bi];if(!b)return;
+    if(inp.dataset.f==="name") b.name=inp.value; else {const n=inp.value===""?0:Number(inp.value); b.amount=n>=0?Math.round(n*100)/100:b.amount;}});};
+  const total=()=>B.reduce((s,b)=>s+(b.bought&&b.paid!=null?b.paid:(Number(b.amount)||0)),0);
+  const drawB=()=>{
+    const cur=document.getElementById("v-cur").value;
+    document.getElementById("v-bud").innerHTML=B.map((b,i)=>`<div class="brow">${isReq(b)?`<span class="req">${esc(b.name)}</span>`:`<input data-bi="${i}" data-f="name" maxlength="30" value="${esc(b.name)}" aria-label="Nombre del gasto">`}
+      <input data-bi="${i}" data-f="amt" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00" value="${b.amount||""}" aria-label="Monto de ${esc(b.name)}">
+      ${isReq(b)?`<span></span>`:`<button type="button" class="bx" data-bdel="${i}" aria-label="Quitar ${esc(b.name)}">×</button>`}</div>`).join("");
+    const used=B.map(b=>b.name.toLowerCase());
+    document.getElementById("v-addb").innerHTML=BUD_OPT.filter(n=>!used.includes(n.toLowerCase())).map(n=>`<button type="button" data-badd="${esc(n)}">+ ${esc(n)}</button>`).join("")+`<button type="button" class="addchip" data-badd="">+ Otro</button>`;
+    document.getElementById("v-total").textContent=money(total(),cur);
+    document.querySelectorAll("#v-bud [data-bi]").forEach(inp=>inp.oninput=()=>{readB();document.getElementById("v-total").textContent=money(total(),document.getElementById("v-cur").value);});
+    document.querySelectorAll("[data-bdel]").forEach(b=>b.onclick=()=>{readB();B.splice(+b.dataset.bdel,1);drawB();});
+    document.querySelectorAll("[data-badd]").forEach(b=>b.onclick=()=>{readB();B.push({id:newId(),name:b.dataset.badd,amount:0,bought:false,paid:null});drawB();
+      const ins=document.querySelectorAll("#v-bud [data-bi]");const last=b.dataset.badd?ins[ins.length-1]:ins[ins.length-2];if(last)last.focus();});
+  };
+  drawB();
+  document.getElementById("v-cur").onchange=()=>{readB();drawB();};
   document.getElementById("v-close").onclick=closeSheet;
   document.getElementById("v-save").onclick=async()=>{
     const g=id=>document.getElementById(id).value, err=document.getElementById("v-err");
-    const name=g("v-name").trim(), target=g("v-target")===""?0:Number(g("v-target"));
+    readB(); const name=g("v-name").trim();
     if(!name){err.textContent="Ponle un nombre al viaje.";return;}
-    if(!(target>=0)){err.textContent="La meta no puede ser negativa.";return;}
-    const data={name,target:Math.round(target*100)/100,cur:g("v-cur"),date:g("v-date"),place:g("v-place").trim(),created:x.created||Date.now()};
+    const extra=B.filter(b=>!isReq(b));
+    if(extra.some(b=>!b.name.trim())){err.textContent="Ponle nombre a cada gasto extra (o quítalo).";return;}
+    const budget=B.filter(b=>isReq(b)||b.amount>0||b.bought).map(b=>({id:b.id||newId(),name:b.name.trim().slice(0,30),amount:Math.round((Number(b.amount)||0)*100)/100,bought:!!b.bought,paid:b.bought&&b.paid!=null?b.paid:null}));
+    const target=Math.round(budget.reduce((s,b)=>s+budgetCost(b),0)*100)/100;
+    const data={name,target,budget,cur:g("v-cur"),date:g("v-date"),place:g("v-place").trim(),created:x.created||Date.now()};
     try{ v?await db.doc("viajes/"+v.id).set(data):await db.collection("viajes").add(data); closeSheet(); toast(!data.date?"Guardado. Ponle fecha para ver la cuenta regresiva":(v?"Viaje actualizado":"Viaje creado")); }
     catch(e){err.textContent=errMsg(e);}
   };
@@ -2291,15 +2472,17 @@ function renderAll(skipAjustes){
 
 document.addEventListener("click",e=>{
   const tp=e.target.closest("[data-trip]");
-  if(tp&&!e.target.closest("[data-aportar],[data-editviaje]")){openTripSheet(tp.dataset.trip);return;}
+  if(tp&&!e.target.closest("[data-aportar],[data-editviaje],[data-sacar],[data-bitem],.bpay")){openTripSheet(tp.dataset.trip);return;}
   const a=e.target.closest("[data-aporte]");
   if(a){const it=aportes.find(x=>x.id===a.dataset.aporte&&x.owner===a.dataset.owner);if(it){it.owner===uid?openSheet(it):showReadOnly(it);}return;}
   const p=e.target.closest("[data-personal]");
-  if(p){const it=mine.find(x=>x.id===p.dataset.personal);if(it){ if(it.type==="ingreso"||it.type==="gasto") openSheet(it); else openMoveSheet(it.type.startsWith("pot")?"pot":"fund",it.ref,it.type.endsWith("_in")?"in":"out",it); }return;}
+  if(p){const it=mine.find(x=>x.id===p.dataset.personal);if(it){ if(it.type==="card_pay") openCardPaySheet(it); else if(it.type==="ingreso"||it.type==="gasto") openSheet(it); else openMoveSheet(it.type.startsWith("pot")?"pot":"fund",it.ref,it.type.endsWith("_in")?"in":"out",it); }return;}
   const ev=e.target.closest("[data-editviaje]");
   if(ev){const v=viajeById(ev.dataset.editviaje);if(v)openViajeSheet(v);return;}
   const evb=e.target.closest("[data-act]");
   if(evb){const ev=findAct(evb.dataset.act);if(ev)openActSheet(ev,{occ:evb.dataset.date||""});return;}
+  const sc=e.target.closest("[data-sacar]");
+  if(sc){openSheet(null,{type:"aporte",viaje:sc.dataset.sacar,adir:"out"});return;}
   const ap=e.target.closest("[data-aportar]");
   if(ap){openSheet(null,{type:"aporte",viaje:ap.dataset.aportar});}
 });
