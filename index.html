@@ -1016,7 +1016,7 @@ function openBalanceSheet(){
     const v=document.getElementById("ab-amt").value, n=Number(v), cur=document.getElementById("ab-cur").value;
     if(v===""||!Number.isFinite(n)){document.getElementById("ab-err").textContent="Escribe un monto.";return;}
     // saldo inicial = lo que tienes hoy − (ingresos − gastos − ahorros), en la moneda elegida
-    const k=balanceInfo(), net=conv(k.ing-k.gas-k.aho,k.c,cur);
+    const k=balanceInfo(), net=conv(k.avail-k.base,k.c,cur);
     savePrefs({startBalance:{amount:Math.round((n-net)*100)/100,cur}}); closeSheet(); toast("Listo, actualizado");
   };
   openScrim(); setTimeout(()=>{const i=document.getElementById("ab-amt");if(i){i.focus();i.select&&i.select();}},50);
