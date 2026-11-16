@@ -623,14 +623,8 @@ button.sblock{cursor:pointer}
 .bt .row{gap:10px}
 .pphead{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;margin:-8px 0 4px}
 .pphead h2{margin:4px 0 0}
-.ppav{border:0;background:none;padding:0;border-radius:50%;cursor:zoom-in}
-.ppav:disabled{cursor:default}
+.ppav{display:block;border-radius:50%}
 .ppav .av{box-shadow:0 0 0 4px var(--card),0 0 0 6px var(--chip)}
-.photoview{position:fixed;inset:0;z-index:300;border:0;padding:24px;background:rgba(10,10,14,.88);display:grid;place-items:center;cursor:zoom-out;animation:pvIn 220ms cubic-bezier(0.23, 1, 0.32, 1) both;transition:opacity 180ms ease-out}
-.photoview img{max-width:100%;max-height:100%;border-radius:24px;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.4)}
-.photoview.out{opacity:0}
-@keyframes pvIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.photoview{animation:none}}
 .bud{display:flex;flex-direction:column;gap:8px}
 .brow{display:grid;grid-template-columns:18px minmax(0,1fr) 84px auto;gap:6px;align-items:center}
 .brow .bact{display:flex;gap:4px;justify-content:flex-end}
@@ -2240,13 +2234,6 @@ async function downloadAppIcon(){
     await dl.save({filename:`closeby-icono-${k}.png`,data:blob});
   }catch(e){ if(!(e&&e.code==="declined")) toast("No se descargó el ícono."); }
 }
-function openPhoto(k){
-  const ph=photos[k]; if(!ph) return;
-  const ov=document.createElement("button"); ov.type="button"; ov.className="photoview"; ov.setAttribute("aria-label","Cerrar foto");
-  ov.innerHTML=`<img src="${ph}" alt="Foto de ${esc(pname(k))}">`; document.body.appendChild(ov);
-  const bye=()=>{ov.classList.add("out");setTimeout(()=>ov.remove(),200);document.removeEventListener("keydown",esc1);};
-  const esc1=e=>{if(e.key==="Escape")bye();}; ov.onclick=bye; document.addEventListener("keydown",esc1);
-}
 function openPartnerSheet(k){
   const sh=document.getElementById("sheet"), c=cfg[k].cur||"PEN", its=aportes.filter(a=>a.who===k);
   const tot=its.reduce((s,a)=>s+conv(apSigned(a),a.cur,c),0), last=[...its].sort(sortByDate)[0];
@@ -2256,7 +2243,7 @@ function openPartnerSheet(k){
   const trips=sortedViajes().filter(v=>its.some(a=>a.viaje===v.id));
   sh.innerHTML=`<div class="row"><span></span><button class="link" type="button" id="pp-close">Cerrar</button></div>
     <div class="pphead">
-      <button type="button" class="ppav" id="pp-photo" ${photos[k]?"":"disabled"} aria-label="Ver foto de ${esc(pname(k))}"><span class="av ${k}" style="width:112px;height:112px;font-size:44px">${esc(pname(k).slice(0,1).toUpperCase())}</span></button>
+      <span class="ppav"><span class="av ${k}" style="width:112px;height:112px;font-size:44px">${esc(pname(k).slice(0,1).toUpperCase())}</span></span>
       <h2>${esc(pfull(k))}</h2>
       <span class="small muted">${esc(cityName(cfg[k].tz))} · <b class="num" style="color:var(--ink)">${time}</b> · ${isOnline(k)?`<span style="color:var(--good)">en línea</span>`:seenText(k)?"activa "+esc(seenText(k)):""}</span>
     </div>
@@ -2269,7 +2256,6 @@ function openPartnerSheet(k){
       ${last?`<div class="bt wide"><span class="k">Último ahorro</span><div class="row"><span><b>${esc(last.note||(viajeById(last.viaje)||{}).name||"Ahorro")}</b><br><small class="muted">${esc(fmtDate(last.date,{day:"numeric",month:"long"}))}</small></span><b class="num" style="color:var(--good)">${last.out?"− ":"+ "}${money(last.amount,last.cur)}</b></div></div>`:""}
     </div>`;
   document.getElementById("pp-close").onclick=closeSheet;
-  document.getElementById("pp-photo").onclick=()=>openPhoto(k);
   openScrim();
 }
 function renderPerfil(){
