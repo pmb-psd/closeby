@@ -188,7 +188,7 @@ h2{font-weight:600;letter-spacing:-.02em}.fig,.big-money{font-weight:600;letter-
 .dock{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom));width:min(444px, calc(100% - 32px));height:64px;border-radius:999px;background:var(--dock);
   display:grid;grid-template-columns:repeat(4,1fr);align-items:center;padding:0 8px;z-index:10;box-shadow:0 10px 30px rgba(10,10,20,.28),inset 0 1px 0 rgba(255,255,255,.08)}
 @supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
-  .dock{background:color-mix(in srgb,var(--dock) 78%,transparent);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%)}
+  .dock{background:color-mix(in srgb,var(--dock) 58%,transparent);-webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%)}
   .toast{background:color-mix(in srgb,var(--ink) 86%,transparent);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%)}
 }
 @media (prefers-reduced-transparency: reduce){.dock{background:var(--dock);-webkit-backdrop-filter:none;backdrop-filter:none}.toast{background:var(--ink);-webkit-backdrop-filter:none;backdrop-filter:none}}
@@ -569,7 +569,7 @@ button.sblock{cursor:pointer}
 .bt.fund .tx b .cur{font-size:.6em;font-weight:600}
 .bt.fund .tx .small{opacity:.7}
 .bt.fund .ring .rt{stroke:rgba(20,19,23,.12)}
-.bt.fund .pb{width:46px;height:46px;border-radius:50%;background:#141317;color:var(--lime);display:grid;place-items:center;font-size:26px;font-weight:400;flex:none;border:0;line-height:1}
+.bt.fund .pb{width:46px;height:46px;border-radius:50%;background:#141317;color:var(--lime);display:grid;place-items:center;flex:none;border:0;padding:0}
 .bt.call{background:var(--lila);color:#fff}
 .bt.call .k{color:rgba(255,255,255,.78)}
 .bt.call b{font-size:20px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
@@ -1032,8 +1032,8 @@ function renderInicio(){
   const fund=focus?(()=>{const st=fst, tg=focus.target;
     return `<div class="bt fund press" role="button" tabindex="0" data-trip="${esc(focus.id)}">${tg>0?ringHTML(focus,st,72,10,`<b style="font-size:16px">${Math.round(st.pct*100)}%</b>`):""}
       <div class="tx"><span class="k">${esc(focus.name)}</span><b class="num"><span class="cur">${sym(focus.cur)}</span> <span data-num="h:${esc(focus.id)}" data-val="${Math.round(st.saved)}">${Math.round(st.saved).toLocaleString("es-PE")}</span></b><span class="small num">${tg>0?"de "+moneyShort(tg,focus.cur):"sin meta"}</span></div>
-      ${me?`<button class="pb press" type="button" data-aportar="${esc(focus.id)}" aria-label="Ahorrar para ${esc(focus.name)}">+</button>`:""}</div>`;})()
-    :`<div class="bt fund"><div class="tx"><span class="k">Su primer viaje</span><b style="font-size:20px">Creen su viaje</b></div>${me?`<button class="pb press" type="button" id="heroNew" aria-label="Crear viaje">+</button>`:""}</div>`;
+      ${me?`<button class="pb press" type="button" data-aportar="${esc(focus.id)}" aria-label="Ahorrar para ${esc(focus.name)}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:""}</div>`;})()
+    :`<div class="bt fund"><div class="tx"><span class="k">Su primer viaje</span><b style="font-size:20px">Creen su viaje</b></div>${me?`<button class="pb press" type="button" id="heroNew" aria-label="Crear viaje"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>`:""}</div>`;
   document.getElementById("v-inicio").innerHTML=`
   <div class="wrap" style="padding:0">
     <p class="greet">${greet}</p>
@@ -1547,9 +1547,9 @@ function renderViajes(){
   document.getElementById("v-viajes").innerHTML=`
   <div class="wrap" style="padding:0">
     <div class="row" style="align-items:flex-end"><h1 class="pagetitle">Viajes</h1><button class="btn limebtn" type="button" id="newViaje">+ Nuevo viaje</button></div>
-    ${vs.length?(()=>{const nv=nextViaje(), vc=viewCur(), tot=vs.reduce((s,v)=>s+conv(viajeStats(v).saved,v.cur,vc),0), dd=nv?daysUntil(nv.date):null;
+    ${vs.length?(()=>{const nv=nextViaje(), fv=nv||vs[0], fs=viajeStats(fv), dd=nv?daysUntil(nv.date):null;
       return `<div class="bento vsum">${nv?`<button type="button" class="bt next press" data-trip="${esc(nv.id)}"><span class="k">${esc(nv.name)}</span><b class="num">${dd===0?"¡Hoy!":dd}</b><span class="small">${dd===0?"se ven":dd===1?"día para verse":"días para verse"}</span></button>`:""}
-        <div class="bt money${nv?"":" wide"}"><span class="k">Ahorrado entre las dos</span><b class="num">${moneyShort(tot,vc)}</b><span class="small muted">${vs.length} ${vs.length===1?"viaje":"viajes"}</span></div></div>`;})():""}
+        <button type="button" class="bt money press${nv?"":" wide"}" data-trip="${esc(fv.id)}"><span class="k">Ahorrado para ${esc(fv.name)}</span><b class="num">${moneyShort(fs.saved,fv.cur)}</b><span class="small muted">${fv.target>0?"de "+moneyShort(fv.target,fv.cur):"sin meta"}</span></button></div>`;})():""}
     ${vs.length?vs.map(v=>{
       const st=viajeStats(v), past=st.days!==null&&st.days<0;
       const when=v.date?fmtDate(v.date,{day:"numeric",month:"short",year:"numeric"}):"Sin fecha";
