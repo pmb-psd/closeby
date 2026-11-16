@@ -289,7 +289,16 @@ legend{font-weight:500;font-size:18px;margin-bottom:6px;padding:0;letter-spacing
 .evheart{width:34px;height:34px;border-radius:12px;flex:none;display:grid;place-items:center;color:#FF4D8D;background:color-mix(in srgb,#FF4D8D 14%,var(--card))}
 .evheart svg{width:18px;height:18px}
 .lheart{display:inline-block;width:11px;height:11px;color:#FF4D8D;line-height:0;vertical-align:-1px;margin-right:4px}.lheart svg{width:100%;height:100%}
-.evdot{width:12px;height:32px;border-radius:999px;flex:none}
+.evdot{width:12px;height:32px;border-radius:999px;flex:none;background:var(--kc)}
+.item.lt .evdot{background:color-mix(in srgb,var(--kc) 24%,var(--card));box-shadow:inset 0 0 0 2px var(--kc)}
+.item.imp.lt{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--kc) 9%,transparent) 0 8px,color-mix(in srgb,var(--kc) 4%,transparent) 8px 16px)}
+.item.lt .imptag{background:color-mix(in srgb,var(--kc) 22%,var(--card));color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--kc)}
+.cday .dots i.lt{background:color-mix(in srgb,var(--kc) 22%,var(--card));box-shadow:inset 0 0 0 1.5px var(--kc)}
+.cday .dots i.lt.big{box-shadow:inset 0 0 0 2px var(--kc),0 0 0 1.5px var(--card)}
+.cday.sel .dots i.lt.big{box-shadow:inset 0 0 0 2px var(--kc),0 0 0 1.5px var(--ink)}
+.toneleg{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.toneleg .sw{display:inline-flex;gap:3px;margin-right:6px;vertical-align:-1px}
+.toneleg .sw i{width:14px;height:10px;border-radius:3px;display:inline-block}
 .owner{display:flex;align-items:center;gap:4px;flex:none}
 .lockmini{color:var(--muted);display:inline-flex}
 .lockmini svg{width:14px;height:14px}
@@ -580,6 +589,7 @@ button.sblock{cursor:pointer}
 .wkev.imp{z-index:2;font-weight:600}
 .wkwho{position:absolute;left:3px;bottom:3px;width:13px;height:13px;border-radius:50%;font-style:normal;font-size:8px;font-weight:700;display:grid;place-items:center;background:var(--p1);color:#fff;box-shadow:0 0 0 1.5px rgba(255,255,255,.85)}
 .wkwho.p2{background:var(--p2)}
+.wkev[data-lt] .wktag{background:var(--kc);color:#fff}
 .wktag{display:block;font-size:8px;font-weight:700;letter-spacing:.02em;background:rgba(255,255,255,.25);color:#fff;border-radius:4px;padding:0 3px;align-self:flex-start;margin-bottom:1px}
 [hidden]{display:none !important}
 </style>
@@ -1793,6 +1803,10 @@ function evTimes(e){
   const a=rng("p1"),b=rng("p2");
   return a===b?`${a} en las dos ciudades`:`${a} ${cityName(cfg.p1.tz)} · ${b} ${cityName(cfg.p2.tz)}`;
 }
+/* Cada persona con su tono: p1 intenso, p2 claro con borde del mismo color */
+function evLight(e){return !!e&&e.slot==="p2"&&e.kind!=="viaje"&&!e.auto;}
+function evPaint(e){const k=e.kind, base=kindColor(k);
+  return evLight(e)?{bg:`color-mix(in srgb,${base} 24%,var(--card))`,ink:"var(--ink)",edge:base,light:true}:{bg:base,ink:wkInk(k),edge:"",light:false};}
 function wkInk(k){return (k==="clases"||k==="trabajo")?"#fff":k==="llamada"?"var(--on-lime)":"#141317";}
 function kindColor(k){return k==="clases"?"#2F6BFF":k==="trabajo"?"#E11D48":k==="llamada"?"var(--lime)":k==="especial"?"#FF7AC6":k==="plan"?"var(--lila)":k==="viaje"?"#4FB3FF":"#F2A33A";}
 
@@ -1822,7 +1836,7 @@ function weekHTML(){
     const n=Math.max(1,laneEnd.length);
     const now=d===t?localParts(Date.now(),viewerTz()).min:null;
     return `<div class="wkcol${d===t?" today":""}" data-col="${d}">${evs.map(x=>{const k=x.e.kind,ttl=x.e.auto?autoTitle(x.e,x.occ):x.e.title;
-      return `<button type="button" class="wkev${IMPORTANT.includes(k)?" imp":""}" data-act="${esc(x.e.key)}" data-date="${esc(x.occ)}" style="--kc:${kindColor(k)};top:${x.st/60*HOUR_PX}px;height:${Math.max(18,(x.en-x.st)/60*HOUR_PX-2)}px;left:calc(${x.lane}*100%/${n} + 1px);width:calc(100%/${n} - 2px);background:${kindColor(k)};color:${wkInk(k)}"><i class="wkwho ${x.e.slot}" aria-label="${esc(pname(x.e.slot))}">${esc(pname(x.e.slot).slice(0,1).toUpperCase())}</i>${IMPORTANT.includes(k)?`<span class="wktag">${k==="clases"?"Clases":"Trabajo"}</span>`:""}<b>${esc(ttl)}</b><small class="num">${fromMin(x.st)}</small>${x.e.vis==="private"?`<i class="wklock">${ICON_LOCK}</i>`:""}</button>`;}).join("")}
+      return `<button type="button" class="wkev${IMPORTANT.includes(k)?" imp":""}" data-act="${esc(x.e.key)}" data-date="${esc(x.occ)}" style="--kc:${kindColor(k)};top:${x.st/60*HOUR_PX}px;height:${Math.max(18,(x.en-x.st)/60*HOUR_PX-2)}px;left:calc(${x.lane}*100%/${n} + 1px);width:calc(100%/${n} - 2px);background:${evPaint(x.e).bg};color:${evPaint(x.e).ink}${evLight(x.e)?`;box-shadow:inset 3px 0 0 ${kindColor(k)},0 0 0 1.5px var(--card)`:""}" ${evLight(x.e)?'data-lt=""':""}><i class="wkwho ${x.e.slot}" aria-label="${esc(pname(x.e.slot))}">${esc(pname(x.e.slot).slice(0,1).toUpperCase())}</i>${IMPORTANT.includes(k)?`<span class="wktag">${k==="clases"?"Clases":"Trabajo"}</span>`:""}<b>${esc(ttl)}</b><small class="num">${fromMin(x.st)}</small>${x.e.vis==="private"?`<i class="wklock">${ICON_LOCK}</i>`:""}</button>`;}).join("")}
       ${now!==null?`<span class="wknow" style="top:${now/60*HOUR_PX}px"></span>`:""}</div>`;
   }).join("");
   const anyAll=days.some(d=>allday[d].length);
@@ -1831,13 +1845,13 @@ function weekHTML(){
     <div class="swclip"><div class="swbody">
     <div class="wkhead"><span></span>${days.map(d=>`<button type="button" class="wkday${d===t?" today":""}${d===calSel?" sel":""}" data-day="${d}"><small>${WD_SHORT[wdOf(d)]}</small><b class="num">${Number(d.slice(8))}</b></button>`).join("")}</div>
     ${anyAll?`<div class="wkall"><span class="wkallk">Todo el día</span>${days.map(d=>`<div class="wkallc">${allday[d].map(x=>{const k=x.e.kind,ttl=x.e.auto?autoTitle(x.e,x.occ):x.e.title;
-      return `<button type="button" class="wkchip" ${k==="viaje"?`data-editviaje="${esc(x.e.viajeId)}"`:`data-act="${esc(x.e.key)}" data-date="${esc(x.occ)}"`} style="background:${kindColor(k)};color:${txt(k)}" title="${esc(ttl)}">${k==="especial"?"♥ ":""}${esc(ttl)}</button>`;}).join("")}</div>`).join("")}</div>`:""}
+      return `<button type="button" class="wkchip" ${k==="viaje"?`data-editviaje="${esc(x.e.viajeId)}"`:`data-act="${esc(x.e.key)}" data-date="${esc(x.occ)}"`} style="background:${evPaint(x.e).bg};color:${evLight(x.e)?"var(--ink)":txt(k)}${evLight(x.e)?`;box-shadow:inset 3px 0 0 ${kindColor(k)}`:""}" title="${esc(ttl)}">${k==="especial"?"♥ ":""}${esc(ttl)}</button>`;}).join("")}</div>`).join("")}</div>`:""}
     <div class="wkscroll" id="wkScroll"><div class="wkgrid" style="height:${24*HOUR_PX}px">
       <div class="wkhours">${[...Array(24)].map((_,i)=>`<span style="top:${i*HOUR_PX}px">${i?String(i).padStart(2,"0")+":00":""}</span>`).join("")}</div>
       ${cols}
     </div></div>
     </div></div>
-    <div class="legend small"><span><i class="dot p1"></i>${esc(pname("p1"))}</span><span><i class="dot p2"></i>${esc(pname("p2"))}</span><span class="muted">El círculo con la inicial indica de quién es.</span></div>
+    <div class="legend small toneleg"><span><span class="sw"><i style="background:#2F6BFF"></i><i style="background:#E11D48"></i></span>Intenso: ${esc(pname("p1"))}</span><span><span class="sw"><i style="background:color-mix(in srgb,#2F6BFF 24%,var(--card));box-shadow:inset 0 0 0 1.5px #2F6BFF"></i><i style="background:color-mix(in srgb,#E11D48 24%,var(--card));box-shadow:inset 0 0 0 1.5px #E11D48"></i></span>Claro: ${esc(pname("p2"))}</span></div>
     <p class="small muted" style="margin:0">Horas en tu zona (${esc(cityName(viewerTz()))}). Toca un espacio vacío para agregar una actividad a esa hora.</p>
   </section>`;
 }
@@ -1893,7 +1907,7 @@ function renderCalendario(){
   for(let d=1;d<=days;d++){
     const ds=`${y}-${String(m).padStart(2,"0")}-${String(d).padStart(2,"0")}`, evs=eventsOn(ds);
     const spc=evs.some(e=>e.kind==="especial"), oth=evs.filter(e=>e.kind!=="especial");
-    cells+=`<button type="button" class="cday${ds===t?" today":""}${ds===calSel?" sel":""}${spc?" spc":""}" data-day="${ds}" aria-label="${d}${spc?", fecha especial":""}${evs.length?", "+evs.length+" eventos":""}">${spc?`<span class="cheart">${ICON_HEART}</span>`:""}<span class="num">${d}</span><span class="dots">${[...oth].sort((a,b)=>(KIND_RANK[a.kind]??9)-(KIND_RANK[b.kind]??9)).slice(0,3).map(e=>`<i class="${IMPORTANT.includes(e.kind)?"big":""}" style="background:${kindColor(e.kind)}"></i>`).join("")}</span></button>`;
+    cells+=`<button type="button" class="cday${ds===t?" today":""}${ds===calSel?" sel":""}${spc?" spc":""}" data-day="${ds}" aria-label="${d}${spc?", fecha especial":""}${evs.length?", "+evs.length+" eventos":""}">${spc?`<span class="cheart">${ICON_HEART}</span>`:""}<span class="num">${d}</span><span class="dots">${[...oth].sort((a,b)=>(KIND_RANK[a.kind]??9)-(KIND_RANK[b.kind]??9)).slice(0,3).map(e=>`<i class="${IMPORTANT.includes(e.kind)?"big":""}${evLight(e)?" lt":""}" style="${evLight(e)?`--kc:${kindColor(e.kind)}`:`background:${kindColor(e.kind)}`}"></i>`).join("")}</span></button>`;
   }
   const sel=eventsOn(calSel);
   const selLabel=(s=>s.charAt(0).toUpperCase()+s.slice(1))(fmtDate(calSel,{weekday:"long",day:"numeric",month:"long"}));
@@ -1911,6 +1925,7 @@ function renderCalendario(){
       <div class="monthnav"><button type="button" id="cPrev" aria-label="Mes anterior">‹</button><h2>${esc(label)}</h2><button type="button" id="cNext" aria-label="Mes siguiente">›</button></div>
       <div class="swclip"><div class="calgrid swbody">${["L","M","M","J","V","S","D"].map(x=>`<span class="cwd">${x}</span>`).join("")}${cells}</div></div>
       <div class="legend small"><span><i class="dot big" style="background:#2F6BFF"></i><b>Clases</b></span><span><i class="dot big" style="background:#E11D48"></i><b>Trabajo</b></span><span><i class="dot" style="background:#F2A33A"></i>Actividad</span><span><i class="dot" style="background:var(--lime)"></i>Llamada</span><span><i class="lheart">${ICON_HEART}</i>Fecha especial</span><span><i class="dot" style="background:var(--lila)"></i>Plan</span><span><i class="dot" style="background:#4FB3FF"></i>Viaje</span></div>
+      <div class="legend small toneleg"><span><span class="sw"><i style="background:#2F6BFF"></i><i style="background:#E11D48"></i></span>Intenso: ${esc(pname("p1"))}</span><span><span class="sw"><i style="background:color-mix(in srgb,#2F6BFF 24%,var(--card));box-shadow:inset 0 0 0 1.5px #2F6BFF"></i><i style="background:color-mix(in srgb,#E11D48 24%,var(--card));box-shadow:inset 0 0 0 1.5px #E11D48"></i></span>Claro: ${esc(pname("p2"))}</span></div>
     </section>`}
 
     <section class="card">
@@ -1984,7 +1999,7 @@ function actItemHTML(e){
   if(e.kind==="viaje") return `<button class="item" type="button" data-editviaje="${esc(e.viajeId)}"><span class="evdot" style="background:${kindColor("viaje")}"></span><span class="t"><b>${esc(e.title)}</b><small>Viaje de las dos · Todo el día</small></span></button>`;
   const kl=EV_KINDS.find(k=>k[0]===e.kind)[1];
   const rt=recurText(e), imp=IMPORTANT.includes(e.kind);
-  return `<button class="item${imp?" imp":""}" type="button" data-act="${esc(e.key)}" data-date="${esc(calSel)}" style="--kc:${kindColor(e.kind)}">${e.kind==="especial"?`<span class="evheart">${ICON_HEART}</span>`:`<span class="evdot" style="background:${kindColor(e.kind)}"></span>`}
+  return `<button class="item${imp?" imp":""}${evLight(e)?" lt":""}" type="button" data-act="${esc(e.key)}" data-date="${esc(calSel)}" style="--kc:${kindColor(e.kind)}">${e.kind==="especial"?`<span class="evheart">${ICON_HEART}</span>`:`<span class="evdot"></span>`}
     <span class="t">${imp?`<span class="imptag">${esc(kl)}</span>`:""}<b>${esc(e.title)}</b><small>${imp?"":esc(kl)+" · "}${rt?esc(rt)+" · ":""}${esc(evTimes(e))}</small></span>
     <span class="owner"><span class="av ${e.slot}" style="width:26px;height:26px;font-size:11px">${esc(pname(e.slot).slice(0,1).toUpperCase())}</span>${e.vis==="private"?`<span class="lockmini" title="Solo tú la ves">${ICON_LOCK}</span>`:""}</span></button>`;
 }
