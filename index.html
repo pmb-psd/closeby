@@ -606,7 +606,8 @@ button.sblock{cursor:pointer}
 .bt.partner .tx b{font-size:18px;font-weight:700;display:flex;align-items:center;gap:6px}
 .bt.partner .tx small,.bt.partner .tx small *{color:rgba(255,255,255,.88)!important;font-size:12px}
 .bt.partner .time{font-size:30px;font-weight:700;letter-spacing:-.04em}
-.bt.partner .av{background:rgba(255,255,255,.22)!important;color:#fff}
+.bt.partner .av:not(.hasphoto){background:rgba(255,255,255,.22)!important;color:#fff}
+.bt.partner .av{box-shadow:0 0 0 2px rgba(255,255,255,.7);flex:none}
 .bt.nav{flex-direction:row;align-items:center;gap:10px;font-weight:600;font-size:15px}
 .bt.nav .seticon{width:34px;height:34px;border-radius:12px;flex:none}
 .bt.nav{padding:12px}
@@ -615,6 +616,21 @@ button.sblock{cursor:pointer}
 .bt.mes .trio span{display:flex;flex-direction:column}
 .bt.mes .trio b{font-size:18px;font-weight:700;letter-spacing:-.02em}
 .bt.mes .trio small{font-size:11px;color:var(--muted)}
+.bt.mes .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bt.mes .tile-s .v.good{color:var(--good)}
+#sheet .bt:not(.fund):not(.spc){background:var(--chip)}
+.bt .row b{white-space:nowrap}
+.bt .row{gap:10px}
+.pphead{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;margin:-8px 0 4px}
+.pphead h2{margin:4px 0 0}
+.ppav{border:0;background:none;padding:0;border-radius:50%;cursor:zoom-in}
+.ppav:disabled{cursor:default}
+.ppav .av{box-shadow:0 0 0 4px var(--card),0 0 0 6px var(--chip)}
+.photoview{position:fixed;inset:0;z-index:300;border:0;padding:24px;background:rgba(10,10,14,.88);display:grid;place-items:center;cursor:zoom-out;animation:pvIn 220ms cubic-bezier(0.23, 1, 0.32, 1) both;transition:opacity 180ms ease-out}
+.photoview img{max-width:100%;max-height:100%;border-radius:24px;object-fit:contain;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.photoview.out{opacity:0}
+@keyframes pvIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.photoview{animation:none}}
 .bud{display:flex;flex-direction:column;gap:8px}
 .brow{display:grid;grid-template-columns:18px minmax(0,1fr) 84px auto;gap:6px;align-items:center}
 .brow .bact{display:flex;gap:4px;justify-content:flex-end}
@@ -2224,6 +2240,38 @@ async function downloadAppIcon(){
     await dl.save({filename:`closeby-icono-${k}.png`,data:blob});
   }catch(e){ if(!(e&&e.code==="declined")) toast("No se descargó el ícono."); }
 }
+function openPhoto(k){
+  const ph=photos[k]; if(!ph) return;
+  const ov=document.createElement("button"); ov.type="button"; ov.className="photoview"; ov.setAttribute("aria-label","Cerrar foto");
+  ov.innerHTML=`<img src="${ph}" alt="Foto de ${esc(pname(k))}">`; document.body.appendChild(ov);
+  const bye=()=>{ov.classList.add("out");setTimeout(()=>ov.remove(),200);document.removeEventListener("keydown",esc1);};
+  const esc1=e=>{if(e.key==="Escape")bye();}; ov.onclick=bye; document.addEventListener("keydown",esc1);
+}
+function openPartnerSheet(k){
+  const sh=document.getElementById("sheet"), c=cfg[k].cur||"PEN", its=aportes.filter(a=>a.who===k);
+  const tot=its.reduce((s,a)=>s+conv(apSigned(a),a.cur,c),0), last=[...its].sort(sortByDate)[0];
+  let time="--:--";try{time=new Date().toLocaleTimeString("es-PE",{timeZone:cfg[k].tz,hour:"2-digit",minute:"2-digit",hour12:false});}catch(e){}
+  const bd=cfg[k].birthday, bdN=bd?nextOccurrence({date:bd,rep:{freq:"yearly",every:1,days:[],until:""},exdates:[]}):null, bdD=bdN?dnum(bdN)-dnum(todayStr()):null;
+  const rs=cfg.relation&&cfg.relation.start, togetherD=rs?dnum(todayStr())-dnum(rs):null;
+  const trips=sortedViajes().filter(v=>its.some(a=>a.viaje===v.id));
+  sh.innerHTML=`<div class="row"><span></span><button class="link" type="button" id="pp-close">Cerrar</button></div>
+    <div class="pphead">
+      <button type="button" class="ppav" id="pp-photo" ${photos[k]?"":"disabled"} aria-label="Ver foto de ${esc(pname(k))}"><span class="av ${k}" style="width:112px;height:112px;font-size:44px">${esc(pname(k).slice(0,1).toUpperCase())}</span></button>
+      <h2>${esc(pfull(k))}</h2>
+      <span class="small muted">${esc(cityName(cfg[k].tz))} · <b class="num" style="color:var(--ink)">${time}</b> · ${isOnline(k)?`<span style="color:var(--good)">en línea</span>`:seenText(k)?"activa "+esc(seenText(k)):""}</span>
+    </div>
+    <div class="bento">
+      <div class="bt fund"><div class="tx"><span class="k">Ahorró para viajes</span><b class="num">${moneyShort(tot,c)}</b></div></div>
+      <div class="bt money"><span class="k">Ahorros</span><b class="num">${its.length}</b></div>
+      ${bdD!==null?`<div class="bt spc"><span class="k">${ICON_HEART} Su cumpleaños</span><b class="num">${bdD===0?"¡Hoy!":bdD}</b><span class="small">${bdD===0?"":bdD===1?"día":"días"}</span></div>`:`<div class="bt money"><span class="k">Viajes</span><b class="num">${trips.length}</b></div>`}
+      ${togetherD!==null&&togetherD>=0?`<div class="bt money wide"><span class="k">Juntas desde ${esc(fmtDate(rs,{day:"numeric",month:"long",year:"numeric"}))}</span><b class="num">${togetherD.toLocaleString("es-PE")} días</b></div>`:""}
+      ${trips.length?`<div class="bt wide"><span class="k">Su parte en cada viaje</span>${trips.map(v=>{const mine=its.filter(a=>a.viaje===v.id).reduce((s,a)=>s+conv(apSigned(a),a.cur,v.cur),0);return `<div class="row small"><span>${esc(v.name)}</span><b class="num">${moneyShort(mine,v.cur)}</b></div>`;}).join("")}</div>`:""}
+      ${last?`<div class="bt wide"><span class="k">Último ahorro</span><div class="row"><span><b>${esc(last.note||(viajeById(last.viaje)||{}).name||"Ahorro")}</b><br><small class="muted">${esc(fmtDate(last.date,{day:"numeric",month:"long"}))}</small></span><b class="num" style="color:var(--good)">${last.out?"− ":"+ "}${money(last.amount,last.cur)}</b></div></div>`:""}
+    </div>`;
+  document.getElementById("pp-close").onclick=closeSheet;
+  document.getElementById("pp-photo").onclick=()=>openPhoto(k);
+  openScrim();
+}
 function renderPerfil(){
   const el=document.getElementById("v-perfil");
   if(!me){el.innerHTML=`<div class="wrap" style="padding:0"><div class="card"><h2>Tu perfil</h2><p class="muted" style="margin:0">Inicia sesión para ver tu perfil.</p></div></div>`;return;}
@@ -2243,10 +2291,10 @@ function renderPerfil(){
       <div class="sub"><span class="pill"><i class="dot ${me}"></i>${esc(cityName(my.tz))}</span><span class="pill">${sym(c)} ${c==="PEN"?"Soles":c==="CAD"?"Dólares canadienses":"Dólares estadounidenses"}</span></div>
     </div>
     <div class="bento">
-      <div class="bt partner${other==="p1"?" p1c":""}"><span class="av ${other}" style="width:44px;height:44px;font-size:18px">${esc(pname(other).slice(0,1).toUpperCase())}</span>
-        <span class="tx"><b>${esc(pname(other))} ${isOnline(other)?`<i class="live on" title="En línea"></i>`:""}</b><small>${esc(cityName(cfg[other].tz))} · ${diffLine()}${!isOnline(other)&&seenText(other)?" · activa "+seenText(other):""}</small></span><span class="time num">${otherTime}</span></div>
+      <button type="button" class="bt partner press${other==="p1"?" p1c":""}" id="openPartner"><span class="av ${other}" style="width:44px;height:44px;font-size:18px">${esc(pname(other).slice(0,1).toUpperCase())}</span>
+        <span class="tx"><b>${esc(pname(other))} ${isOnline(other)?`<i class="live on" title="En línea"></i>`:""}</b><small>${esc(cityName(cfg[other].tz))} · ${diffLine()}${!isOnline(other)&&seenText(other)?" · activa "+seenText(other):""}</small></span><span class="time num">${otherTime}</span></button>
       <div class="bt fund"><div class="tx"><span class="k">Ahorraste para viajes</span><b class="num">${moneyShort(total,c)}</b></div></div>
-      <a class="bt mes wide press" href="#dinero"><span class="k">${ICON_LOCK} Tu mes</span><span class="trio num"><span><small>Entró</small><b class="good" style="color:var(--good)">${moneyShort(tm.ingreso,viewCur())}</b></span><span><small>Gastos</small><b>${moneyShort(tm.gasto,viewCur())}</b></span><span><small>Ahorrado</small><b>${moneyShort(tm.ahorro,viewCur())}</b></span></span></a>
+      <a class="bt mes wide press" href="#dinero"><span class="k">${ICON_LOCK} Tu mes</span><span class="grid3"><span class="tile-s"><span class="k">Entró</span><span class="v good">${moneyShort(tm.ingreso,viewCur())}</span></span><span class="tile-s"><span class="k">Gastos</span><span class="v">${moneyShort(tm.gasto,viewCur())}</span></span><span class="tile-s"><span class="k">Ahorrado</span><span class="v">${moneyShort(tm.ahorro,viewCur())}</span></span></span></a>
       <a class="bt nav press" href="#ajustes"><span class="seticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg></span><span class="nl">Ajustes</span></a>
       <button class="bt nav press" type="button" id="openProf"><span class="seticon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.2-3.6 4-5.3 7.5-5.3s6.3 1.7 7.5 5.3"/></svg></span><span class="nl">Tus datos</span></button>
     </div>
@@ -2270,6 +2318,7 @@ function renderPerfil(){
     <p class="small muted" style="margin:0;text-align:center">${esc((window.closeby&&window.closeby.email)||"")}</p>
   </div>`;
   document.getElementById("openProf").onclick=openProfileSheet;
+  document.getElementById("openPartner").onclick=()=>openPartnerSheet(other);
   document.getElementById("avEdit").onclick=openProfileSheet;
   el.querySelectorAll("[data-ico]").forEach(b=>b.onclick=()=>{homeIcon=b.dataset.ico;setTouchIcon(homeIcon);try{localStorage.setItem("closeby-icon",homeIcon);}catch(e){}el.querySelectorAll("[data-ico]").forEach(x=>x.setAttribute("aria-pressed",x===b));});
   setTouchIcon(homeIcon);
