@@ -579,6 +579,7 @@ button.sblock{cursor:pointer}
 .bt.bprio .bseg i{border-radius:4px;background:var(--chip);display:block;position:relative;overflow:hidden;min-width:4px}
 .bt.bprio .bseg u{position:absolute;inset:0 auto 0 0;background:var(--lila);border-radius:4px;display:block}
 .bt.money b{font-size:clamp(19px,6vw,24px);font-weight:700;letter-spacing:-.03em;white-space:nowrap}
+.bt.money.fin b{font-size:clamp(15px,4.6vw,21px);letter-spacing:-.02em}
 .bt .list{margin-top:-4px}
 .ovt{display:flex;align-items:center;gap:10px;width:100%;padding:8px 0;border:0;border-top:1px solid var(--line);background:transparent;color:inherit;font:inherit;text-align:left}
 .ovt:first-of-type{border-top:0}
@@ -1402,10 +1403,10 @@ function renderDinero(){
       ${balanceHeroHTML()}
       ${(()=>{const b=balanceInfo(); if(!b.hasStart&&!mine.length&&!aportes.some(a=>a.owner===uid)) return "";
         const lim=cardLimit(), limC=lim.amount>0?conv(lim.amount,lim.cur,b.c):0, debt=Math.max(0,b.debt), pc=limC>0?Math.min(100,debt/limC*100):0;
-        return `<div class="bt money"><span class="k">Entró</span><b class="num good">${moneyShort(b.ing,b.c)}</b></div>
-        <div class="bt money"><span class="k">Gastaste</span><b class="num">${moneyShort(b.gas-b.cred+b.pay,b.c)}</b></div>
-        <div class="bt money"><span class="k">Ahorrado</span><b class="num">${moneyShort(b.aho,b.c)}</b></div>
-        <button type="button" class="bt money cardt press" id="cardTile"><span class="k">${ICON_CARD} Tarjeta</span><b class="num">${moneyShort(debt,b.c)}</b>${limC>0?`<span class="lbar"><i data-grow="bar" style="width:${pc}%;${pc>=90?"background:var(--bad)":""}"></i></span>`:`<span class="small muted">${debt>0.005?"por pagar":"sin deuda"}</span>`}</button>`;})()}
+        return `<div class="bt money fin"><span class="k">Entró</span><b class="num good">${money(b.ing,b.c)}</b></div>
+        <div class="bt money fin"><span class="k">Gastaste</span><b class="num">${money(b.gas-b.cred+b.pay,b.c)}</b></div>
+        <div class="bt money fin"><span class="k">Ahorrado</span><b class="num">${money(b.aho,b.c)}</b></div>
+        <button type="button" class="bt money fin cardt press" id="cardTile"><span class="k">${ICON_CARD} Tarjeta</span><b class="num">${money(debt,b.c)}</b>${limC>0?`<span class="lbar"><i data-grow="bar" style="width:${pc}%;${pc>=90?"background:var(--bad)":""}"></i></span>`:`<span class="small muted">${debt>0.005?"por pagar":"sin deuda"}</span>`}</button>`;})()}
     </div>
     <h2 id="monthDetail" class="sectitle">Este mes</h2>
     <div class="monthnav"><button type="button" id="mPrev" aria-label="Mes anterior">‹</button><h2>${esc(label)}</h2><button type="button" id="mNext" aria-label="Mes siguiente">›</button></div>
